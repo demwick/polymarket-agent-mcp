@@ -29,15 +29,19 @@ function render(data) {
   if (data.recentTrades.length > 0) {
     noTrades.style.display = "none";
     tbody.innerHTML = data.recentTrades.map(function(t) {
-      var time = t.created_at ? t.created_at.split("T")[1].slice(0, 5) : "-";
-      var addr = t.trader_address.slice(0, 6) + "..";
+      var time = "-";
+      if (t.created_at) {
+        var parts = t.created_at.includes("T") ? t.created_at.split("T") : t.created_at.split(" ");
+        time = parts[1] ? parts[1].slice(0, 5) : "-";
+      }
+      var addr = t.trader_address ? t.trader_address.slice(0, 6) + ".." : "-";
       return "<tr>" +
         "<td>" + time + "</td>" +
         "<td>" + addr + "</td>" +
-        "<td>" + (t.market_slug || "-") + "</td>" +
-        "<td>$" + t.price.toFixed(2) + "</td>" +
-        "<td>$" + t.amount.toFixed(2) + "</td>" +
-        "<td>" + t.status + "</td>" +
+        "<td>" + (t.market_slug || "-").slice(0, 30) + "</td>" +
+        "<td>$" + (t.price || 0).toFixed(2) + "</td>" +
+        "<td>$" + (t.amount || 0).toFixed(2) + "</td>" +
+        "<td>" + (t.status || "-") + "</td>" +
         "</tr>";
     }).join("");
   } else {
@@ -65,7 +69,8 @@ function render(data) {
   var logDiv = document.getElementById("log-stream");
   if (data.logs.length > 0) {
     logDiv.innerHTML = data.logs.map(function(l) {
-      var time = l.timestamp.split("T")[1].slice(0, 8);
+      var parts = l.timestamp.includes("T") ? l.timestamp.split("T") : l.timestamp.split(" ");
+      var time = parts[1] ? parts[1].slice(0, 8) : "";
       return '<div class="log-entry ' + l.level + '">[' + time + '] <b>' + l.level + '</b>: ' + l.message + '</div>';
     }).join("");
     logDiv.scrollTop = logDiv.scrollHeight;
