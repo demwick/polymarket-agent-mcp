@@ -19,9 +19,11 @@ export async function handleClosePosition(db: Database.Database, input: z.infer<
     return `No open position found with ID ${input.trade_id}.`;
   }
 
-  // For manual close in preview mode, assume breakeven
-  const exitPrice = trade.price;
-  const pnl = 0;
+  // Get current market price for P&L calculation
+  const { getMarketPriceByCondition } = await import("../services/price-service.js");
+  const priceInfo = await getMarketPriceByCondition(trade.condition_id);
+  const exitPrice = priceInfo?.price ?? trade.price;
+  const pnl = trade.price > 0 ? ((exitPrice - trade.price) * trade.amount) / trade.price : 0;
 
   updateTradeExit(db, input.trade_id, exitPrice, input.reason, pnl);
 

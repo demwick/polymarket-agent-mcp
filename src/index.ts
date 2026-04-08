@@ -29,6 +29,7 @@ import { getTraderPositionsSchema, handleGetTraderPositions } from "./tools/get-
 import { getPositionsSchema, handleGetPositions } from "./tools/get-positions.js";
 import { closePositionSchema, handleClosePosition } from "./tools/close-position.js";
 import { discoverMarketsSchema, handleDiscoverMarkets } from "./tools/discover-markets.js";
+import { getPriceSchema, handleGetPrice } from "./tools/get-price.js";
 
 import { startWebDashboard } from "./web/server.js";
 
@@ -145,6 +146,13 @@ server.tool(
   "Find active markets by end date (today/this_week/all) and category — great for finding fast-resolving markets",
   discoverMarketsSchema.shape,
   async (input) => ({ content: [{ type: "text" as const, text: await handleDiscoverMarkets(discoverMarketsSchema.parse(input)) }] })
+);
+
+server.tool(
+  "get_price",
+  "Get live market prices (bid/ask/spread) or current value of all open positions",
+  getPriceSchema.shape,
+  async (input) => ({ content: [{ type: "text" as const, text: await handleGetPrice(db, getPriceSchema.parse(input)) }] })
 );
 
 // Start web dashboard
