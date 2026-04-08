@@ -53,6 +53,9 @@ import { buySchema, handleBuy } from "./tools/buy.js";
 import { sellSchema, handleSell } from "./tools/sell.js";
 import { handleGetBalance } from "./tools/get-balance.js";
 import { searchMarketsSchema, handleSearchMarkets } from "./tools/search-markets.js";
+import { detectArbitrageSchema, handleDetectArbitrage } from "./tools/detect-arbitrage.js";
+import { findRelatedSchema, handleFindRelated } from "./tools/find-related.js";
+import { getTopHoldersSchema, handleGetTopHolders } from "./tools/get-top-holders.js";
 
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -301,6 +304,27 @@ server.tool(
   "Search Polymarket markets by keyword (e.g. 'bitcoin', 'election', 'UFC')",
   searchMarketsSchema.shape,
   safe("search_markets", async (input) => ({ content: [{ type: "text" as const, text: await handleSearchMarkets(searchMarketsSchema.parse(input)) }] }))
+);
+
+server.tool(
+  "detect_arbitrage",
+  "Scan top markets for arbitrage — find where YES+NO prices don't sum to $1.00",
+  detectArbitrageSchema.shape,
+  safe("detect_arbitrage", async (input) => ({ content: [{ type: "text" as const, text: await handleDetectArbitrage(detectArbitrageSchema.parse(input)) }] }))
+);
+
+server.tool(
+  "find_related",
+  "Find markets related to a given market or topic",
+  findRelatedSchema.shape,
+  safe("find_related", async (input) => ({ content: [{ type: "text" as const, text: await handleFindRelated(findRelatedSchema.parse(input)) }] }))
+);
+
+server.tool(
+  "get_top_holders",
+  "See the biggest position holders in a market — who's betting big",
+  getTopHoldersSchema.shape,
+  safe("get_top_holders", async (input) => ({ content: [{ type: "text" as const, text: await handleGetTopHolders(getTopHoldersSchema.parse(input)) }] }))
 );
 
 // Start MCP server
