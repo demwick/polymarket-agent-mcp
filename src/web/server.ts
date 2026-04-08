@@ -43,6 +43,24 @@ export function startWebDashboard(
     });
   });
 
+  app.post("/api/monitor/start", (_req, res) => {
+    if (monitor.getStatus().running) {
+      res.json({ ok: true, message: "Already running" });
+    } else {
+      monitor.start(30_000);
+      res.json({ ok: true, message: "Monitor started" });
+    }
+  });
+
+  app.post("/api/monitor/stop", (_req, res) => {
+    if (!monitor.getStatus().running) {
+      res.json({ ok: true, message: "Already stopped" });
+    } else {
+      monitor.stop();
+      res.json({ ok: true, message: "Monitor stopped" });
+    }
+  });
+
   app.listen(port, () => {
     log("info", `Web dashboard running at http://localhost:${port}`);
     // Auto-open dashboard in browser

@@ -23,6 +23,14 @@ function render(data) {
     data.stats.total + " (W:" + data.stats.wins + " L:" + data.stats.losses + ")";
   document.getElementById("monitor-text").textContent =
     data.monitor.running ? "Active" : "Stopped";
+  var btn = document.getElementById("monitor-btn");
+  if (data.monitor.running) {
+    btn.textContent = "Stop";
+    btn.className = "running";
+  } else {
+    btn.textContent = "Start";
+    btn.className = "";
+  }
 
   var tbody = document.getElementById("trades-body");
   var noTrades = document.getElementById("no-trades");
@@ -77,6 +85,19 @@ function render(data) {
   } else {
     logDiv.innerHTML = '<div class="log-entry info">No events yet</div>';
   }
+}
+
+async function toggleMonitor() {
+  var btn = document.getElementById("monitor-btn");
+  var action = btn.textContent === "Start" ? "start" : "stop";
+  btn.disabled = true;
+  try {
+    await fetch("/api/monitor/" + action, { method: "POST" });
+    await fetchDashboard();
+  } catch (err) {
+    console.error("Monitor toggle failed:", err);
+  }
+  btn.disabled = false;
 }
 
 fetchDashboard();
