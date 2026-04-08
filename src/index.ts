@@ -38,6 +38,8 @@ import { handleCheckExits } from "./tools/check-exits.js";
 import { setExitRulesSchema, handleSetExitRules } from "./tools/set-exit-rules.js";
 import { handleGetPortfolio } from "./tools/get-portfolio.js";
 import { backtestTraderSchema, handleBacktestTrader } from "./tools/backtest-trader.js";
+import { discoverFlowSchema, handleDiscoverFlow } from "./tools/discover-flow.js";
+import { getPriceHistorySchema, handleGetPriceHistory } from "./tools/get-price-history.js";
 import { scoreTraderSchema, handleScoreTrader } from "./tools/score-trader.js";
 import { checkMarketSchema, handleCheckMarket } from "./tools/check-market.js";
 
@@ -232,6 +234,20 @@ server.tool(
   "Check market quality — spread, liquidity depth, and price range for safe trading",
   checkMarketSchema.shape,
   async (input) => ({ content: [{ type: "text" as const, text: await handleCheckMarket(checkMarketSchema.parse(input)) }] })
+);
+
+server.tool(
+  "discover_flow",
+  "Scan top traders for smart money signals — find markets where multiple top traders are buying simultaneously (Pro)",
+  discoverFlowSchema.shape,
+  async (input) => ({ content: [{ type: "text" as const, text: await handleDiscoverFlow(discoverFlowSchema.parse(input)) }] })
+);
+
+server.tool(
+  "get_price_history",
+  "Get historical price data for a market token (1h/6h/1d/1w/1m intervals with sparkline)",
+  getPriceHistorySchema.shape,
+  async (input) => ({ content: [{ type: "text" as const, text: await handleGetPriceHistory(getPriceHistorySchema.parse(input)) }] })
 );
 
 // Start MCP server
