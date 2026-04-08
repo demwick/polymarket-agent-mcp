@@ -1,7 +1,7 @@
 import Database from "better-sqlite3";
 import { ClobClient, Side, OrderType } from "@polymarket/clob-client";
 import { Wallet } from "@ethersproject/wallet";
-import { recordTrade } from "../db/queries.js";
+import { recordTrade, recordTradeWithBudget } from "../db/queries.js";
 import { getConfig, hasLiveCredentials } from "../utils/config.js";
 import { log } from "../utils/logger.js";
 
@@ -17,6 +17,8 @@ export interface TradeOrder {
   negRisk: boolean;
   orderSide?: "BUY" | "SELL";
   orderType?: "GTC" | "GTD";
+  /** Optional budget info for atomic trade+budget recording (preview mode) */
+  budget?: { date: string; spendAmount: number; dailyLimit: number };
 }
 
 export interface TradeResult {
@@ -42,7 +44,7 @@ export class TradeExecutor {
   }
 
   private simulateTrade(order: TradeOrder): TradeResult {
-    const tradeId = recordTrade(this.db, {
+    const tradeData = {
       trader_address: order.traderAddress,
       market_slug: order.marketSlug,
       condition_id: order.conditionId,
@@ -51,9 +53,14 @@ export class TradeExecutor {
       price: order.price,
       amount: order.amount,
       original_amount: order.originalAmount,
-      mode: "preview",
-      status: "simulated",
-    });
+      mode: "preview" as const,
+      status: "simulated" as const,
+    };
+
+    // Use atomic transaction if budget info provided
+    const tradeId = order.budget
+      ? recordTradeWithBudget(this.db, tradeData, order.budget.date, order.budget.spendAmount, order.budget.dailyLimit)
+      : recordTrade(this.db, tradeData);
 
     log("trade", `[PREVIEW] Simulated BUY $${order.amount} @ ${order.price} on ${order.marketSlug}`, {
       trader: order.traderAddress,

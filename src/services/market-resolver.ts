@@ -1,4 +1,5 @@
 import { log } from "../utils/logger.js";
+import { fetchWithRetry } from "../utils/fetch.js";
 
 const GAMMA_API_BASE = "https://gamma-api.polymarket.com";
 
@@ -14,7 +15,7 @@ export interface MarketInfo {
 export async function resolveMarketByConditionId(conditionId: string): Promise<MarketInfo | null> {
   try {
     const url = `${GAMMA_API_BASE}/markets?condition_id=${conditionId}`;
-    const response = await fetch(url);
+    const response = await fetchWithRetry(url);
     if (!response.ok) return null;
 
     const data = await response.json();

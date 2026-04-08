@@ -1,4 +1,5 @@
 import { log } from "../utils/logger.js";
+import { fetchWithRetry } from "../utils/fetch.js";
 
 const CLOB_API_BASE = "https://clob.polymarket.com";
 const GAMMA_API_BASE = "https://gamma-api.polymarket.com";
@@ -15,7 +16,7 @@ export interface MarketPrice {
 export async function getMarketPrice(tokenId: string): Promise<MarketPrice | null> {
   try {
     const url = `${CLOB_API_BASE}/book?token_id=${tokenId}`;
-    const res = await fetch(url);
+    const res = await fetchWithRetry(url);
     if (!res.ok) return null;
     const book = await res.json();
 
@@ -34,7 +35,7 @@ export async function getMarketPrice(tokenId: string): Promise<MarketPrice | nul
 export async function getMarketPriceByCondition(conditionId: string): Promise<{ price: number; tokenId: string } | null> {
   try {
     const url = `${GAMMA_API_BASE}/markets?condition_id=${conditionId}`;
-    const res = await fetch(url);
+    const res = await fetchWithRetry(url);
     if (!res.ok) return null;
     const data = await res.json();
     if (!Array.isArray(data) || data.length === 0) return null;

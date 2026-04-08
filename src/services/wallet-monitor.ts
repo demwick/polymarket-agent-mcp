@@ -5,6 +5,7 @@ import { TradeExecutor, type TradeOrder } from "./trade-executor.js";
 import { resolveMarketByConditionId } from "./market-resolver.js";
 import { PositionTracker } from "./position-tracker.js";
 import { log } from "../utils/logger.js";
+import { fetchWithRetry } from "../utils/fetch.js";
 
 const DATA_API_BASE = "https://data-api.polymarket.com";
 
@@ -87,7 +88,7 @@ export function filterNewTrades(
 
 async function fetchWalletActivity(address: string): Promise<RawActivity[]> {
   const url = `${DATA_API_BASE}/activity?user=${address}&type=TRADE&side=BUY&limit=20`;
-  const response = await fetch(url);
+  const response = await fetchWithRetry(url);
   if (!response.ok) {
     throw new Error(`Activity API error: ${response.status}`);
   }
@@ -97,6 +98,7 @@ async function fetchWalletActivity(address: string): Promise<RawActivity[]> {
 export class WalletMonitor {
   private intervalId: ReturnType<typeof setInterval> | null = null;
   private isRunning = false;
+  private tickInProgress = false;
 
   constructor(
     private db: Database.Database,
@@ -133,6 +135,20 @@ export class WalletMonitor {
   }
 
   private async tick(): Promise<void> {
+    if (this.tickInProgress) {
+      log("warn", "Skipping tick — previous tick still in progress");
+      return;
+    }
+    this.tickInProgress = true;
+
+    try {
+      await this.executeTick();
+    } finally {
+      this.tickInProgress = false;
+    }
+  }
+
+  private async executeTick(): Promise<void> {
     // Check exits first
     if (this.positionTracker) {
       try {
@@ -178,6 +194,8 @@ export class WalletMonitor {
             ? null
             : await resolveMarketByConditionId(trade.conditionId);
 
+          const today = new Date().toISOString().split("T")[0];
+
           const order: TradeOrder = {
             traderAddress: wallet.address,
             marketSlug: trade.slug || marketInfo?.slug || trade.title,
@@ -188,12 +206,13 @@ export class WalletMonitor {
             originalAmount: trade.investedAmount,
             tickSize: marketInfo?.tickSize ?? "0.01",
             negRisk: marketInfo?.negRisk ?? false,
+            budget: { date: today, spendAmount: copyAmount, dailyLimit: this.budgetManager.getDailyLimit() },
           };
 
           const result = await this.tradeExecutor.execute(order);
 
-          if (result.status !== "failed") {
-            const today = new Date().toISOString().split("T")[0];
+          // In live mode, budget recording happens separately (not in atomic transaction)
+          if (result.status !== "failed" && result.mode === "live") {
             this.budgetManager.recordSpending(today, copyAmount);
           }
 

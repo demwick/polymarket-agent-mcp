@@ -1,4 +1,5 @@
 import { log } from "../utils/logger.js";
+import { fetchWithRetry } from "../utils/fetch.js";
 
 const DATA_API_BASE = "https://data-api.polymarket.com";
 
@@ -35,8 +36,20 @@ export async function analyzeTrader(address: string, detailed: boolean): Promise
     outcome: a.outcome ?? "",
   }));
 
-  const wins = trades.filter((t: RecentTrade) => t.side === "BUY").length;
-  const total = trades.length;
+  // Win rate: SELL trades where exit price > entry price indicate profit
+  // BUY = entry, SELL = exit. A SELL at higher price than avg BUY = win
+  const sells = trades.filter((t: RecentTrade) => t.side === "SELL");
+  const buys = trades.filter((t: RecentTrade) => t.side === "BUY");
+  // Build avg entry price per market title
+  const avgEntry = new Map<string, number>();
+  for (const b of buys) {
+    avgEntry.set(b.title, b.price);
+  }
+  const wins = sells.filter((s: RecentTrade) => {
+    const entry = avgEntry.get(s.title);
+    return entry !== undefined && s.price > entry;
+  }).length;
+  const total = sells.length;
   const winRate = total > 0 ? (wins / total) * 100 : 0;
   const avgSize = trades.length > 0
     ? trades.reduce((sum: number, t: RecentTrade) => sum + t.size * t.price, 0) / trades.length
@@ -55,7 +68,7 @@ export async function analyzeTrader(address: string, detailed: boolean): Promise
 async function fetchTraderActivity(address: string): Promise<any[]> {
   try {
     const url = `${DATA_API_BASE}/activity?user=${address}&type=TRADE&limit=50`;
-    const res = await fetch(url);
+    const res = await fetchWithRetry(url);
     if (!res.ok) return [];
     return await res.json();
   } catch (err) {
@@ -67,7 +80,7 @@ async function fetchTraderActivity(address: string): Promise<any[]> {
 async function fetchTraderPositions(address: string): Promise<any[]> {
   try {
     const url = `${DATA_API_BASE}/positions?user=${address}&limit=50`;
-    const res = await fetch(url);
+    const res = await fetchWithRetry(url);
     if (!res.ok) return [];
     return await res.json();
   } catch (err) {
@@ -79,7 +92,7 @@ async function fetchTraderPositions(address: string): Promise<any[]> {
 export async function getTraderOpenPositions(address: string, limit: number = 20): Promise<any[]> {
   try {
     const url = `${DATA_API_BASE}/positions?user=${address}&sortBy=CURRENT&limit=${limit}`;
-    const res = await fetch(url);
+    const res = await fetchWithRetry(url);
     if (!res.ok) return [];
     return await res.json();
   } catch (err) {

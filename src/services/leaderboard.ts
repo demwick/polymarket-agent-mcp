@@ -1,4 +1,5 @@
 import { log } from "../utils/logger.js";
+import { fetchWithRetry } from "../utils/fetch.js";
 
 const DATA_API_BASE = "https://data-api.polymarket.com";
 
@@ -43,7 +44,7 @@ export async function fetchLeaderboardPage(
 
   log("info", `Fetching leaderboard: period=${timePeriod}, offset=${offset}, limit=${limit}`);
 
-  const response = await fetch(url);
+  const response = await fetchWithRetry(url);
   if (!response.ok) {
     throw new Error(`Leaderboard API error: ${response.status} ${response.statusText}`);
   }
