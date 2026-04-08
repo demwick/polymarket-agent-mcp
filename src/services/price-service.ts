@@ -40,9 +40,26 @@ export async function getMarketPriceByCondition(conditionId: string): Promise<{ 
     if (!Array.isArray(data) || data.length === 0) return null;
 
     const market = data[0];
-    const prices = market.outcomePrices;
-    const price = Array.isArray(prices) ? parseFloat(prices[0]) : parseFloat((prices ?? "").split(",")[0] ?? "0");
-    const tokenId = market.clobTokenIds?.[0] ?? "";
+    const rawPrices = market.outcomePrices;
+    let price = 0;
+    if (rawPrices) {
+      try {
+        const parsed = typeof rawPrices === "string" ? JSON.parse(rawPrices) : rawPrices;
+        price = Array.isArray(parsed) ? parseFloat(parsed[0]) : parseFloat(String(rawPrices));
+      } catch {
+        price = parseFloat(String(rawPrices).split(",")[0] ?? "0");
+      }
+    }
+    const rawTokenIds = market.clobTokenIds;
+    let tokenId = "";
+    if (rawTokenIds) {
+      try {
+        const parsed = typeof rawTokenIds === "string" ? JSON.parse(rawTokenIds) : rawTokenIds;
+        tokenId = Array.isArray(parsed) ? parsed[0] : String(rawTokenIds);
+      } catch {
+        tokenId = String(rawTokenIds);
+      }
+    }
 
     return { price, tokenId };
   } catch (err) {
