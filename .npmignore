@@ -1,0 +1,12 @@
+src/
+tests/
+docs/
+.env*
+*.db*
+.firecrawl/
+.DS_Store
+CLAUDE.md
+tsconfig.json
+vitest.config.*
+.gitignore
+copytrader.db*

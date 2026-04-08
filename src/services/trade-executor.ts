@@ -187,6 +187,14 @@ export class TradeExecutor {
     return { tradeId, mode: "live", status: "failed", message: `Failed: ${reason}` };
   }
 
+  async cancelAllOrders(): Promise<{ cancelled: number }> {
+    const client = await this.getClobClient();
+    const openOrders = await client.getOpenOrders();
+    if (!openOrders || openOrders.length === 0) return { cancelled: 0 };
+    await client.cancelAll();
+    return { cancelled: openOrders.length };
+  }
+
   setMode(mode: "preview" | "live"): void {
     this.mode = mode;
     this.clobClient = null;

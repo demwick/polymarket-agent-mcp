@@ -2,5 +2,8 @@ node_modules/
 dist/
 .env
 *.db
+*.db-shm
+*.db-wal
 .firecrawl/
 .DS_Store
+docs/superpowers/

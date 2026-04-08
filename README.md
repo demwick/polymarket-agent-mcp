@@ -1,91 +1,136 @@
-# Polymarket Copy Trader
+# Polymarket Copy Trader MCP Server
 
-MCP server for Claude Code that discovers top Polymarket traders and copies their trades proportionally.
+MCP server for discovering, analyzing, and copying top Polymarket traders through Claude Code or any MCP-compatible client.
 
 ## Features
 
-- **Trader Discovery** — Scan Polymarket leaderboard for top performers by PnL and volume
-- **Wallet Monitoring** — Track selected traders' wallets every 30 seconds for new trades
-- **Proportional Copy Trading** — Automatically copy trades with conviction-based sizing
-- **Preview Mode** — Simulate all trades without risking real money (default)
-- **Live Mode** — Execute real trades via Polymarket CLOB API
-- **Web Dashboard** — Real-time dashboard at localhost:3847
-- **Free/Pro Tiers** — Core features free, advanced features with Pro license
+- **Copy Trading** — Watch top traders and automatically copy their trades (preview or live)
+- **Smart Money Flow** — Detect when multiple top traders converge on the same market
+- **Backtest** — Simulate copying any trader's historical trades before committing capital
+- **Conviction Scoring** — 0-100 score based on win rate, consistency, experience, and diversity
+- **Market Quality Filter** — Auto-skip illiquid markets based on spread, depth, and price range
+- **Stop-Loss / Take-Profit** — Set automated exit rules on any position
+- **Auto-Rebalance** — Remove underperforming traders from your watchlist
+- **30 MCP Tools** — Full control via natural language through Claude Code
+
+## Quick Start
+
+### Prerequisites
+
+- Node.js 18+
+- Claude Code CLI (or any MCP client)
+
+### Installation
+
+```bash
+npm install -g polymarket-copy-trader
+```
+
+Or add to Claude Code config (`~/.claude/settings.json`):
+
+```json
+{
+  "mcpServers": {
+    "polymarket": {
+      "command": "npx",
+      "args": ["polymarket-copy-trader"]
+    }
+  }
+}
+```
+
+### Configuration
+
+Copy `.env.example` to `.env` and configure:
+
+```bash
+cp .env.example .env
+```
+
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `COPY_MODE` | No | `preview` | `preview` (simulated) or `live` (real orders) |
+| `DAILY_BUDGET` | No | `20` | Max daily spend in USDC |
+| `MIN_CONVICTION` | No | `3` | Min trade size to copy ($) |
+| `POLY_PRIVATE_KEY` | Live only | - | Polymarket wallet private key |
+| `POLY_API_KEY` | Live only | - | CLOB API key |
+| `POLY_API_SECRET` | Live only | - | CLOB API secret |
+| `POLY_API_PASSPHRASE` | Live only | - | CLOB API passphrase |
+| `MCP_LICENSE_KEY` | Pro | - | Marketplace license key |
+
+## Tools
+
+### Discovery
+| Tool | Description |
+|------|-------------|
+| `discover_traders` | Find top traders by PnL and volume |
+| `discover_markets` | Find markets by end date and category |
+| `discover_wta` | Find WTA tennis markets with stink bid prices |
+| `discover_flow` | Smart money signals — multiple top traders buying same market |
+
+### Trading
+| Tool | Description |
+|------|-------------|
+| `watch_wallet` | Add/remove traders from watchlist |
+| `start_monitor` | Start copy trading loop |
+| `stop_monitor` | Stop copy trading loop |
+| `place_stink_bid` | Place limit orders at discount |
+| `cancel_orders` | Cancel all open orders |
+| `go_live` | Switch from preview to live mode |
+
+### Analysis
+| Tool | Description |
+|------|-------------|
+| `analyze_trader` | Detailed trader profile with win rate and P&L |
+| `score_trader` | Conviction score (0-100) across 5 dimensions |
+| `backtest_trader` | Simulate copying past trades |
+| `check_market` | Market quality check (spread, depth) |
+| `get_price` | Live bid/ask/spread prices |
+| `get_price_history` | Historical prices with sparkline (1h-1m) |
+
+### Portfolio
+| Tool | Description |
+|------|-------------|
+| `get_portfolio` | Multi-wallet overview with P&L per trader |
+| `get_positions` | Open/closed positions |
+| `close_position` | Manually close a position |
+| `set_exit_rules` | Set stop-loss and take-profit levels |
+| `check_exits` | Check positions for resolution |
+| `rebalance` | Remove underperforming traders |
+| `watch_market` | Market watchlist with price alerts |
+
+### Utilities
+| Tool | Description |
+|------|-------------|
+| `get_dashboard` | Terminal-formatted dashboard |
+| `get_trade_history` | Trade history with filters |
+| `set_config` | Update bot settings |
+| `list_watchlist` | Show watched wallets |
+| `log_cycle` | Log agent cycle for dashboard tracking |
 
 ## Free vs Pro
 
 | Feature | Free | Pro |
 |---------|------|-----|
-| Discover traders | 1 page, top 10 | Full leaderboard |
-| Watchlist | Max 3 wallets | Unlimited |
-| Dashboard | Basic stats | Full trades + logs |
-| Monitor & copy | - | 30s auto-copy |
-| Trade history | - | Full history |
-| Live trading | - | Real orders |
-| Config management | - | Full control |
+| Discover traders | 1 page | Full |
+| Watch wallets | 3 max | Unlimited |
+| Monitor | - | Full |
+| Trade history | - | Full |
+| Backtest | - | Full |
+| Smart flow | - | Full |
+| Rebalance | - | Full |
 
-## Setup
+Get a Pro license at [mcp-marketplace.io](https://mcp-marketplace.io/server/polymarket-copy-trader).
 
-1. Install dependencies:
-   ```bash
-   npm install
-   ```
+## Development
 
-2. Copy environment config:
-   ```bash
-   cp .env.example .env
-   ```
-
-3. Build:
-   ```bash
-   npm run build
-   ```
-
-4. Add to Claude Code settings (`~/.claude/settings.json`):
-   ```json
-   {
-     "mcpServers": {
-       "polymarket-copy-trader": {
-         "command": "node",
-         "args": ["/path/to/polymarket-copy-trader/dist/index.js"],
-         "env": {
-           "MCP_LICENSE_KEY": "mcp_live_..."
-         }
-       }
-     }
-   }
-   ```
-
-5. Restart Claude Code.
-
-## Usage
-
-Talk to Claude naturally:
-
-- "Find the best Polymarket traders"
-- "Add 0xABC...DEF to my watchlist"
-- "Show my watchlist"
-- "Start monitoring"
-- "Show me the dashboard"
-- "What's my trade history?"
-- "Set daily budget to 30"
-- "Go live"
-
-## Preview Mode
-
-By default, all trades are simulated. No real money is used until you explicitly say "go live" (requires Pro + API credentials).
-
-## Web Dashboard
-
-Open http://localhost:3847 while the MCP server is running for a real-time visual dashboard.
-
-## Getting API Credentials (for Live mode)
-
-1. Go to https://polymarket.com and connect your wallet
-2. Fund your account with USDC on Polygon
-3. Export your private key
-4. Derive API keys using the CLOB client
-5. Add all credentials to `.env`
+```bash
+git clone https://github.com/demwick/polymarket-mcp.git
+cd polymarket-mcp
+npm install
+npm run build
+npm test         # 200+ tests
+```
 
 ## License
 

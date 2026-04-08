@@ -1,7 +1,7 @@
 import { z } from "zod";
 import Database from "better-sqlite3";
 import { discoverTraders } from "../services/leaderboard.js";
-import { addToWatchlist } from "../db/queries.js";
+import { addToWatchlist, getWatchlistCount } from "../db/queries.js";
 import { checkLicense, requirePro } from "../utils/license.js";
 
 export const discoverTradersSchema = z.object({
@@ -35,7 +35,12 @@ export async function handleDiscoverTraders(db: Database.Database, input: Discov
   const displayTraders = isPro ? traders : traders.slice(0, 10);
 
   if (input.auto_watch) {
-    for (const t of displayTraders) {
+    const currentCount = getWatchlistCount(db);
+    const maxWallets = isPro ? Infinity : 3;
+    const canAdd = Math.max(0, maxWallets - currentCount);
+    const toWatch = displayTraders.slice(0, canAdd);
+
+    for (const t of toWatch) {
       addToWatchlist(db, {
         address: t.address,
         alias: t.name,
@@ -58,9 +63,15 @@ export async function handleDiscoverTraders(db: Database.Database, input: Discov
   if (!isPro && traders.length > 10) {
     footer = `\n\n_${traders.length - 10} more traders available with Pro._`;
   }
-  footer += input.auto_watch
-    ? `\n\n${displayTraders.length} traders added to watchlist.`
-    : `\n\nUse \`watch_wallet\` to add traders to your watchlist.`;
+  if (input.auto_watch) {
+    const currentCount = getWatchlistCount(db);
+    const maxWallets = isPro ? Infinity : 3;
+    const added = Math.min(displayTraders.length, Math.max(0, maxWallets - currentCount + displayTraders.length));
+    footer += `\n\n${added} traders added to watchlist.`;
+    if (!isPro && currentCount >= 3) footer += " (Free tier limit: 3 wallets)";
+  } else {
+    footer += `\n\nUse \`watch_wallet\` to add traders to your watchlist.`;
+  }
 
   return header + tableHeader + rows + footer;
 }

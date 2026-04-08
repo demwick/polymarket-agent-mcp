@@ -14,16 +14,14 @@ export async function handleCancelOrders(executor: TradeExecutor): Promise<strin
   }
 
   try {
-    const client = await (executor as any).getClobClient();
-    const openOrders = await client.getOpenOrders();
+    const result = await executor.cancelAllOrders();
 
-    if (!openOrders || openOrders.length === 0) {
+    if (result.cancelled === 0) {
       return "No open orders to cancel.";
     }
 
-    await client.cancelAll();
-    log("trade", `Cancelled ${openOrders.length} open orders`);
-    return `Cancelled ${openOrders.length} open orders.`;
+    log("trade", `Cancelled ${result.cancelled} open orders`);
+    return `Cancelled ${result.cancelled} open orders.`;
   } catch (err: any) {
     log("error", `Cancel orders failed: ${err}`);
     const hint = err?.message?.includes("credentials") ? " Check your API credentials in .env." : "";

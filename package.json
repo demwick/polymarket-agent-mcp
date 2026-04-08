@@ -28,9 +28,8 @@
   },
   "files": [
     "dist/**/*",
-    "src/web/public/**/*",
-    "LAUNCHGUIDE.md",
-    "README.md"
+    "README.md",
+    ".env.example"
   ],
   "dependencies": {
     "@ethersproject/wallet": "^5.8.0",

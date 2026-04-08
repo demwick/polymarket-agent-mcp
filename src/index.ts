@@ -4,10 +4,15 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import Database from "better-sqlite3";
 import path from "path";
 import { fileURLToPath } from "url";
+import { createRequire } from "module";
+
+const require = createRequire(import.meta.url);
+const pkg = require("../package.json");
 
 import { initializeDb } from "./db/schema.js";
 import { getConfig, hasLiveCredentials, validateLiveCredentials } from "./utils/config.js";
 import { log } from "./utils/logger.js";
+import { safe } from "./utils/tool-wrapper.js";
 
 import { BudgetManager } from "./services/budget-manager.js";
 import { TradeExecutor } from "./services/trade-executor.js";
@@ -60,210 +65,210 @@ const walletMonitor = new WalletMonitor(db, budgetManager, tradeExecutor, config
 
 const server = new McpServer({
   name: "polymarket-copy-trader",
-  version: "1.0.0",
+  version: pkg.version,
 });
 
 server.tool(
   "discover_traders",
   "Discover top traders from Polymarket leaderboard by PnL, volume, and ROI",
   discoverTradersSchema.shape,
-  async (input) => ({ content: [{ type: "text" as const, text: await handleDiscoverTraders(db, discoverTradersSchema.parse(input)) }] })
+  safe("discover_traders", async (input) => ({ content: [{ type: "text" as const, text: await handleDiscoverTraders(db, discoverTradersSchema.parse(input)) }] }))
 );
 
 server.tool(
   "watch_wallet",
   "Add or remove a wallet address from the watchlist",
   watchWalletSchema.shape,
-  async (input) => ({ content: [{ type: "text" as const, text: await handleWatchWallet(db, watchWalletSchema.parse(input)) }] })
+  safe("watch_wallet", async (input) => ({ content: [{ type: "text" as const, text: await handleWatchWallet(db, watchWalletSchema.parse(input)) }] }))
 );
 
 server.tool(
   "list_watchlist",
   "Show all watched wallet addresses",
   {},
-  async () => ({ content: [{ type: "text" as const, text: handleListWatchlist(db) }] })
+  safe("list_watchlist", async () => ({ content: [{ type: "text" as const, text: handleListWatchlist(db) }] }))
 );
 
 server.tool(
   "start_monitor",
   "Start the wallet monitoring loop to detect and copy new trades (Pro)",
   startMonitorSchema.shape,
-  async (input) => ({ content: [{ type: "text" as const, text: await handleStartMonitor(db, walletMonitor, startMonitorSchema.parse(input)) }] })
+  safe("start_monitor", async (input) => ({ content: [{ type: "text" as const, text: await handleStartMonitor(db, walletMonitor, startMonitorSchema.parse(input)) }] }))
 );
 
 server.tool(
   "stop_monitor",
   "Stop the wallet monitoring loop (Pro)",
   {},
-  async () => ({ content: [{ type: "text" as const, text: await handleStopMonitor(walletMonitor) }] })
+  safe("stop_monitor", async () => ({ content: [{ type: "text" as const, text: await handleStopMonitor(walletMonitor) }] }))
 );
 
 server.tool(
   "get_dashboard",
   "Get a terminal-formatted dashboard with budget, P&L, trades, and watchlist status",
   {},
-  async () => ({ content: [{ type: "text" as const, text: await handleGetDashboard(db, budgetManager, walletMonitor, tradeExecutor.getMode()) }] })
+  safe("get_dashboard", async () => ({ content: [{ type: "text" as const, text: await handleGetDashboard(db, budgetManager, walletMonitor, tradeExecutor.getMode()) }] }))
 );
 
 server.tool(
   "get_trade_history",
   "Get trade history with optional filters (Pro)",
   tradeHistorySchema.shape,
-  async (input) => ({ content: [{ type: "text" as const, text: await handleGetTradeHistory(db, tradeHistorySchema.parse(input)) }] })
+  safe("get_trade_history", async (input) => ({ content: [{ type: "text" as const, text: await handleGetTradeHistory(db, tradeHistorySchema.parse(input)) }] }))
 );
 
 server.tool(
   "set_config",
   "Update bot configuration like daily_budget or min_conviction (Pro)",
   setConfigSchema.shape,
-  async (input) => ({ content: [{ type: "text" as const, text: await handleSetConfig(db, budgetManager, setConfigSchema.parse(input)) }] })
+  safe("set_config", async (input) => ({ content: [{ type: "text" as const, text: await handleSetConfig(db, budgetManager, setConfigSchema.parse(input)) }] }))
 );
 
 server.tool(
   "go_live",
   "Switch from preview to live mode — requires API credentials in .env (Pro)",
   goLiveSchema.shape,
-  async (input) => ({ content: [{ type: "text" as const, text: await handleGoLive(tradeExecutor, goLiveSchema.parse(input)) }] })
+  safe("go_live", async (input) => ({ content: [{ type: "text" as const, text: await handleGoLive(tradeExecutor, goLiveSchema.parse(input)) }] }))
 );
 
 server.tool(
   "analyze_trader",
   "Get detailed analysis of a trader's profile, win rate, and recent activity",
   analyzeTraderSchema.shape,
-  async (input) => ({ content: [{ type: "text" as const, text: await handleAnalyzeTrader(analyzeTraderSchema.parse(input)) }] })
+  safe("analyze_trader", async (input) => ({ content: [{ type: "text" as const, text: await handleAnalyzeTrader(analyzeTraderSchema.parse(input)) }] }))
 );
 
 server.tool(
   "get_trader_positions",
   "View a trader's current open positions on Polymarket (Pro)",
   getTraderPositionsSchema.shape,
-  async (input) => ({ content: [{ type: "text" as const, text: await handleGetTraderPositions(getTraderPositionsSchema.parse(input)) }] })
+  safe("get_trader_positions", async (input) => ({ content: [{ type: "text" as const, text: await handleGetTraderPositions(getTraderPositionsSchema.parse(input)) }] }))
 );
 
 server.tool(
   "get_positions",
   "View your copy trading positions — open, closed, or all",
   getPositionsSchema.shape,
-  async (input) => ({ content: [{ type: "text" as const, text: await handleGetPositions(db, getPositionsSchema.parse(input)) }] })
+  safe("get_positions", async (input) => ({ content: [{ type: "text" as const, text: await handleGetPositions(db, getPositionsSchema.parse(input)) }] }))
 );
 
 server.tool(
   "close_position",
   "Manually close a copy trading position (Pro)",
   closePositionSchema.shape,
-  async (input) => ({ content: [{ type: "text" as const, text: await handleClosePosition(db, closePositionSchema.parse(input)) }] })
+  safe("close_position", async (input) => ({ content: [{ type: "text" as const, text: await handleClosePosition(db, closePositionSchema.parse(input)) }] }))
 );
 
 server.tool(
   "discover_markets",
   "Find active markets by end date (today/this_week/all) and category — great for finding fast-resolving markets",
   discoverMarketsSchema.shape,
-  async (input) => ({ content: [{ type: "text" as const, text: await handleDiscoverMarkets(discoverMarketsSchema.parse(input)) }] })
+  safe("discover_markets", async (input) => ({ content: [{ type: "text" as const, text: await handleDiscoverMarkets(discoverMarketsSchema.parse(input)) }] }))
 );
 
 server.tool(
   "get_price",
   "Get live market prices (bid/ask/spread) or current value of all open positions",
   getPriceSchema.shape,
-  async (input) => ({ content: [{ type: "text" as const, text: await handleGetPrice(db, getPriceSchema.parse(input)) }] })
+  safe("get_price", async (input) => ({ content: [{ type: "text" as const, text: await handleGetPrice(db, getPriceSchema.parse(input)) }] }))
 );
 
 server.tool(
   "discover_wta",
   "Find today's WTA tennis matches on Polymarket with stink bid prices (favorite at discount)",
   discoverWtaSchema.shape,
-  async (input) => ({ content: [{ type: "text" as const, text: await handleDiscoverWta(discoverWtaSchema.parse(input)) }] })
+  safe("discover_wta", async (input) => ({ content: [{ type: "text" as const, text: await handleDiscoverWta(discoverWtaSchema.parse(input)) }] }))
 );
 
 server.tool(
   "place_stink_bid",
   "Place stink bids (limit orders at discount) on all today's WTA favorites (Pro)",
   placeStinkBidSchema.shape,
-  async (input) => ({ content: [{ type: "text" as const, text: await handlePlaceStinkBid(db, tradeExecutor, placeStinkBidSchema.parse(input)) }] })
+  safe("place_stink_bid", async (input) => ({ content: [{ type: "text" as const, text: await handlePlaceStinkBid(db, tradeExecutor, placeStinkBidSchema.parse(input)) }] }))
 );
 
 server.tool(
   "cancel_orders",
   "Cancel all open/pending limit orders on Polymarket (Pro, live mode only)",
   cancelOrdersSchema.shape,
-  async () => ({ content: [{ type: "text" as const, text: await handleCancelOrders(tradeExecutor) }] })
+  safe("cancel_orders", async () => ({ content: [{ type: "text" as const, text: await handleCancelOrders(tradeExecutor) }] }))
 );
 
 server.tool(
   "check_exits",
   "Check all open positions for resolution (market resolved or trader exit) and update P&L",
   {},
-  async () => ({ content: [{ type: "text" as const, text: await handleCheckExits(db) }] })
+  safe("check_exits", async () => ({ content: [{ type: "text" as const, text: await handleCheckExits(db) }] }))
 );
 
 server.tool(
   "log_cycle",
   "Log an agent cycle result to the database for dashboard tracking",
   logCycleSchema.shape,
-  (input) => ({ content: [{ type: "text" as const, text: handleLogCycle(db, logCycleSchema.parse(input)) }] })
+  safe("log_cycle", (input) => ({ content: [{ type: "text" as const, text: handleLogCycle(db, logCycleSchema.parse(input)) }] }))
 );
 
 server.tool(
   "set_exit_rules",
   "Set stop-loss and/or take-profit price levels on an open position (Pro)",
   setExitRulesSchema.shape,
-  async (input) => ({ content: [{ type: "text" as const, text: await handleSetExitRules(db, setExitRulesSchema.parse(input)) }] })
+  safe("set_exit_rules", async (input) => ({ content: [{ type: "text" as const, text: await handleSetExitRules(db, setExitRulesSchema.parse(input)) }] }))
 );
 
 server.tool(
   "get_portfolio",
   "View multi-wallet portfolio overview with per-wallet P&L, positions, and exit rules",
   {},
-  async () => ({ content: [{ type: "text" as const, text: await handleGetPortfolio(db) }] })
+  safe("get_portfolio", async () => ({ content: [{ type: "text" as const, text: await handleGetPortfolio(db) }] }))
 );
 
 server.tool(
   "backtest_trader",
   "Simulate copying a trader's past trades to see hypothetical P&L (Pro)",
   backtestTraderSchema.shape,
-  async (input) => ({ content: [{ type: "text" as const, text: await handleBacktestTrader(backtestTraderSchema.parse(input)) }] })
+  safe("backtest_trader", async (input) => ({ content: [{ type: "text" as const, text: await handleBacktestTrader(backtestTraderSchema.parse(input)) }] }))
 );
 
 server.tool(
   "score_trader",
   "Calculate conviction score (0-100) for a trader based on win rate, volume, consistency, experience, and diversity",
   scoreTraderSchema.shape,
-  async (input) => ({ content: [{ type: "text" as const, text: await handleScoreTrader(scoreTraderSchema.parse(input)) }] })
+  safe("score_trader", async (input) => ({ content: [{ type: "text" as const, text: await handleScoreTrader(scoreTraderSchema.parse(input)) }] }))
 );
 
 server.tool(
   "check_market",
   "Check market quality — spread, liquidity depth, and price range for safe trading",
   checkMarketSchema.shape,
-  async (input) => ({ content: [{ type: "text" as const, text: await handleCheckMarket(checkMarketSchema.parse(input)) }] })
+  safe("check_market", async (input) => ({ content: [{ type: "text" as const, text: await handleCheckMarket(checkMarketSchema.parse(input)) }] }))
 );
 
 server.tool(
   "discover_flow",
   "Scan top traders for smart money signals — find markets where multiple top traders are buying simultaneously (Pro)",
   discoverFlowSchema.shape,
-  async (input) => ({ content: [{ type: "text" as const, text: await handleDiscoverFlow(discoverFlowSchema.parse(input)) }] })
+  safe("discover_flow", async (input) => ({ content: [{ type: "text" as const, text: await handleDiscoverFlow(discoverFlowSchema.parse(input)) }] }))
 );
 
 server.tool(
   "get_price_history",
   "Get historical price data for a market token (1h/6h/1d/1w/1m intervals with sparkline)",
   getPriceHistorySchema.shape,
-  async (input) => ({ content: [{ type: "text" as const, text: await handleGetPriceHistory(getPriceHistorySchema.parse(input)) }] })
+  safe("get_price_history", async (input) => ({ content: [{ type: "text" as const, text: await handleGetPriceHistory(getPriceHistorySchema.parse(input)) }] }))
 );
 
 server.tool(
   "watch_market",
   "Add/remove/list markets on your market watchlist with optional price alerts",
   watchMarketSchema.shape,
-  async (input) => ({ content: [{ type: "text" as const, text: await handleWatchMarket(db, watchMarketSchema.parse(input)) }] })
+  safe("watch_market", async (input) => ({ content: [{ type: "text" as const, text: await handleWatchMarket(db, watchMarketSchema.parse(input)) }] }))
 );
 
 server.tool(
   "rebalance",
   "Analyze watchlist traders and remove underperformers based on conviction score and win rate (Pro)",
   rebalanceSchema.shape,
-  async (input) => ({ content: [{ type: "text" as const, text: await handleRebalance(db, rebalanceSchema.parse(input)) }] })
+  safe("rebalance", async (input) => ({ content: [{ type: "text" as const, text: await handleRebalance(db, rebalanceSchema.parse(input)) }] }))
 );
 
 // Start MCP server
