@@ -1,6 +1,7 @@
 import express from "express";
 import path from "path";
 import { fileURLToPath } from "url";
+import { exec } from "child_process";
 import Database from "better-sqlite3";
 import { getWatchlist, getTradeHistory, getTradeStats } from "../db/queries.js";
 import { BudgetManager } from "../services/budget-manager.js";
@@ -44,5 +45,11 @@ export function startWebDashboard(
 
   app.listen(port, () => {
     log("info", `Web dashboard running at http://localhost:${port}`);
+    // Auto-open dashboard in browser
+    const url = `http://localhost:${port}`;
+    const cmd = process.platform === "darwin" ? `open "${url}"`
+      : process.platform === "win32" ? `start "${url}"`
+      : `xdg-open "${url}"`;
+    exec(cmd);
   });
 }
