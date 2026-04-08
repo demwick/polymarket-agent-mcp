@@ -35,6 +35,29 @@ export class PositionTracker {
         ).get(pos.id!);
         if (!stillOpen) continue;
 
+        // Check 0: Stop-loss / take-profit
+        if (pos.sl_price || pos.tp_price) {
+          const currentPrice = await this.getCurrentPrice(pos.condition_id!);
+          if (currentPrice > 0) {
+            if (pos.sl_price && currentPrice <= pos.sl_price) {
+              const pnl = this.calculatePnl(pos.price, currentPrice, pos.amount);
+              updateTradeExit(this.db, pos.id!, currentPrice, "stop_loss", pnl);
+              this.recycleBudget(pos.amount, pnl);
+              log("trade", `Position closed (stop-loss): ${pos.market_slug} @ $${currentPrice.toFixed(2)} P&L: $${pnl.toFixed(2)}`);
+              closedCount++;
+              continue;
+            }
+            if (pos.tp_price && currentPrice >= pos.tp_price) {
+              const pnl = this.calculatePnl(pos.price, currentPrice, pos.amount);
+              updateTradeExit(this.db, pos.id!, currentPrice, "take_profit", pnl);
+              this.recycleBudget(pos.amount, pnl);
+              log("trade", `Position closed (take-profit): ${pos.market_slug} @ $${currentPrice.toFixed(2)} P&L: $${pnl.toFixed(2)}`);
+              closedCount++;
+              continue;
+            }
+          }
+        }
+
         // Check 1: Did the trader exit?
         const traderExited = await this.checkTraderExit(
           pos.trader_address,

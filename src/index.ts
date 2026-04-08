@@ -35,6 +35,8 @@ import { placeStinkBidSchema, handlePlaceStinkBid } from "./tools/place-stink-bi
 import { cancelOrdersSchema, handleCancelOrders } from "./tools/cancel-orders.js";
 import { logCycleSchema, handleLogCycle } from "./tools/log-cycle.js";
 import { handleCheckExits } from "./tools/check-exits.js";
+import { setExitRulesSchema, handleSetExitRules } from "./tools/set-exit-rules.js";
+import { handleGetPortfolio } from "./tools/get-portfolio.js";
 
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -192,6 +194,20 @@ server.tool(
   "Log an agent cycle result to the database for dashboard tracking",
   logCycleSchema.shape,
   (input) => ({ content: [{ type: "text" as const, text: handleLogCycle(db, logCycleSchema.parse(input)) }] })
+);
+
+server.tool(
+  "set_exit_rules",
+  "Set stop-loss and/or take-profit price levels on an open position (Pro)",
+  setExitRulesSchema.shape,
+  async (input) => ({ content: [{ type: "text" as const, text: await handleSetExitRules(db, setExitRulesSchema.parse(input)) }] })
+);
+
+server.tool(
+  "get_portfolio",
+  "View multi-wallet portfolio overview with per-wallet P&L, positions, and exit rules",
+  {},
+  async () => ({ content: [{ type: "text" as const, text: await handleGetPortfolio(db) }] })
 );
 
 // Start MCP server

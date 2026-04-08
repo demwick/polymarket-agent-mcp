@@ -69,4 +69,10 @@ export function initializeDb(db: Database.Database): void {
     CREATE INDEX IF NOT EXISTS idx_trades_created_at ON trades(created_at);
     CREATE INDEX IF NOT EXISTS idx_daily_budget_date ON daily_budget(date);
   `);
+
+  // Migrations — add columns safely
+  const cols = db.prepare("PRAGMA table_info(trades)").all() as { name: string }[];
+  const colNames = new Set(cols.map((c) => c.name));
+  if (!colNames.has("sl_price")) db.exec("ALTER TABLE trades ADD COLUMN sl_price REAL");
+  if (!colNames.has("tp_price")) db.exec("ALTER TABLE trades ADD COLUMN tp_price REAL");
 }

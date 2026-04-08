@@ -28,6 +28,8 @@ export interface TradeRecord {
   resolved_at?: string | null;
   current_price?: number | null;
   exit_reason?: string | null;
+  sl_price?: number | null;
+  tp_price?: number | null;
 }
 
 export function addToWatchlist(db: Database.Database, entry: Omit<WatchlistEntry, "added_at" | "last_checked">): void {
@@ -172,6 +174,51 @@ export function getPositionsByStatus(
     return db.prepare("SELECT * FROM trades WHERE status IN ('resolved_win', 'resolved_loss', 'failed') ORDER BY resolved_at DESC").all() as TradeRecord[];
   }
   return db.prepare("SELECT * FROM trades ORDER BY created_at DESC").all() as TradeRecord[];
+}
+
+export function setExitRules(db: Database.Database, tradeId: number, slPrice: number | null, tpPrice: number | null): boolean {
+  const result = db.prepare(
+    "UPDATE trades SET sl_price = ?, tp_price = ? WHERE id = ? AND status IN ('simulated', 'executed')"
+  ).run(slPrice, tpPrice, tradeId);
+  return result.changes > 0;
+}
+
+export function getPositionsWithExitRules(db: Database.Database): TradeRecord[] {
+  return db.prepare(
+    "SELECT * FROM trades WHERE status IN ('simulated', 'executed') AND (sl_price IS NOT NULL OR tp_price IS NOT NULL) ORDER BY created_at DESC"
+  ).all() as TradeRecord[];
+}
+
+export interface WalletPortfolio {
+  address: string;
+  alias: string | null;
+  openPositions: number;
+  closedPositions: number;
+  totalInvested: number;
+  realizedPnl: number;
+  winRate: number;
+}
+
+export function getPortfolioByWallet(db: Database.Database): WalletPortfolio[] {
+  const wallets = db.prepare("SELECT address, alias FROM watchlist").all() as { address: string; alias: string | null }[];
+
+  return wallets.map((w) => {
+    const trades = db.prepare("SELECT status, amount, pnl FROM trades WHERE trader_address = ?").all(w.address) as { status: string; amount: number; pnl: number }[];
+    const open = trades.filter((t) => t.status === "simulated" || t.status === "executed");
+    const wins = trades.filter((t) => t.status === "resolved_win").length;
+    const losses = trades.filter((t) => t.status === "resolved_loss").length;
+    const resolved = wins + losses;
+
+    return {
+      address: w.address,
+      alias: w.alias,
+      openPositions: open.length,
+      closedPositions: resolved,
+      totalInvested: open.reduce((sum, t) => sum + t.amount, 0),
+      realizedPnl: trades.reduce((sum, t) => sum + (t.pnl ?? 0), 0),
+      winRate: resolved > 0 ? (wins / resolved) * 100 : 0,
+    };
+  });
 }
 
 /** Daily P&L history for charting — returns cumulative running total */

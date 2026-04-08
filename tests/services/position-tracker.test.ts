@@ -194,6 +194,74 @@ describe("PositionTracker", () => {
     expect(closed).toBe(0);
   });
 
+  it("triggers stop-loss when price drops below threshold", async () => {
+    const id = recordTrade(db, {
+      trader_address: "0xtrader1", market_slug: "sl-test", condition_id: "cond_sl",
+      token_id: "tok_sl", side: "BUY", price: 0.5, amount: 10, original_amount: 20,
+      mode: "preview", status: "simulated",
+    });
+    db.prepare("UPDATE trades SET sl_price = 0.3 WHERE id = ?").run(id);
+
+    vi.spyOn(globalThis, "fetch").mockImplementation(async (url) => {
+      const urlStr = String(url);
+      if (urlStr.includes("clob.polymarket.com/markets/")) {
+        return Response.json({ closed: false, tokens: [{ token_id: "tok_sl", price: 0.25 }] });
+      }
+      return Response.json([]);
+    });
+
+    const closed = await tracker.checkExits();
+    expect(closed).toBe(1);
+
+    const trades = getTradeHistory(db, { limit: 10 });
+    expect(trades[0].exit_reason).toBe("stop_loss");
+    expect(trades[0].status).toBe("resolved_loss");
+  });
+
+  it("triggers take-profit when price rises above threshold", async () => {
+    const id = recordTrade(db, {
+      trader_address: "0xtrader1", market_slug: "tp-test", condition_id: "cond_tp",
+      token_id: "tok_tp", side: "BUY", price: 0.5, amount: 10, original_amount: 20,
+      mode: "preview", status: "simulated",
+    });
+    db.prepare("UPDATE trades SET tp_price = 0.85 WHERE id = ?").run(id);
+
+    vi.spyOn(globalThis, "fetch").mockImplementation(async (url) => {
+      const urlStr = String(url);
+      if (urlStr.includes("clob.polymarket.com/markets/")) {
+        return Response.json({ closed: false, tokens: [{ token_id: "tok_tp", price: 0.9 }] });
+      }
+      return Response.json([]);
+    });
+
+    const closed = await tracker.checkExits();
+    expect(closed).toBe(1);
+
+    const trades = getTradeHistory(db, { limit: 10 });
+    expect(trades[0].exit_reason).toBe("take_profit");
+    expect(trades[0].status).toBe("resolved_win");
+  });
+
+  it("does not trigger SL/TP when price is within range", async () => {
+    const id = recordTrade(db, {
+      trader_address: "0xtrader1", market_slug: "safe", condition_id: "cond_safe",
+      token_id: "tok_safe", side: "BUY", price: 0.5, amount: 10, original_amount: 20,
+      mode: "preview", status: "simulated",
+    });
+    db.prepare("UPDATE trades SET sl_price = 0.3, tp_price = 0.85 WHERE id = ?").run(id);
+
+    vi.spyOn(globalThis, "fetch").mockImplementation(async (url) => {
+      const urlStr = String(url);
+      if (urlStr.includes("clob.polymarket.com/markets/")) {
+        return Response.json({ closed: false, tokens: [{ token_id: "tok_safe", price: 0.55 }] });
+      }
+      return Response.json([]);
+    });
+
+    const closed = await tracker.checkExits();
+    expect(closed).toBe(0);
+  });
+
   describe("calculatePnl", () => {
     it("calculates positive pnl", () => {
       // Access via prototype
