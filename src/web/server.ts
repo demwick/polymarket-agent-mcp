@@ -1,7 +1,6 @@
-import express from "express";
+import express, { type Request, type Response, type NextFunction } from "express";
 import path from "path";
 import { fileURLToPath } from "url";
-import { exec } from "child_process";
 import Database from "better-sqlite3";
 import { getWatchlist, getTradeHistory, getTradeStats, addToWatchlist, removeFromWatchlist } from "../db/queries.js";
 import { BudgetManager } from "../services/budget-manager.js";
@@ -25,23 +24,28 @@ export function startWebDashboard(
   app.use(express.static(path.join(__dirname, "public")));
 
   app.get("/api/dashboard", (_req, res) => {
-    const stats = getTradeStats(db);
-    const remaining = budgetManager.getRemainingBudget();
-    const dailyLimit = budgetManager.getDailyLimit();
-    const watchlist = getWatchlist(db);
-    const recentTrades = getTradeHistory(db, { limit: 20 });
-    const monitorStatus = monitor.getStatus();
-    const logs = getRecentLogs(20);
+    try {
+      const stats = getTradeStats(db);
+      const remaining = budgetManager.getRemainingBudget();
+      const dailyLimit = budgetManager.getDailyLimit();
+      const watchlist = getWatchlist(db);
+      const recentTrades = getTradeHistory(db, { limit: 20 });
+      const monitorStatus = monitor.getStatus();
+      const logs = getRecentLogs(20);
 
-    res.json({
-      mode: executor.getMode(),
-      budget: { spent: dailyLimit - remaining, limit: dailyLimit, remaining },
-      stats,
-      watchlist,
-      recentTrades,
-      monitor: monitorStatus,
-      logs,
-    });
+      res.json({
+        mode: executor.getMode(),
+        budget: { spent: dailyLimit - remaining, limit: dailyLimit, remaining },
+        stats,
+        watchlist,
+        recentTrades,
+        monitor: monitorStatus,
+        logs,
+      });
+    } catch (err) {
+      log("error", `Dashboard API error: ${err}`);
+      res.status(500).json({ ok: false, error: "Internal server error" });
+    }
   });
 
   app.post("/api/monitor/start", (_req, res) => {
@@ -66,54 +70,67 @@ export function startWebDashboard(
 
   // Agent cycles API
   app.get("/api/agents", (_req, res) => {
-    const agents = db.prepare(`
-      SELECT agent_name, strategy,
-        MAX(created_at) as last_cycle,
-        COUNT(*) as total_cycles
-      FROM agent_cycles
-      GROUP BY agent_name
-      ORDER BY last_cycle DESC
-    `).all();
-    res.json({ ok: true, agents });
+    try {
+      const agents = db.prepare(`
+        SELECT agent_name, strategy,
+          MAX(created_at) as last_cycle,
+          COUNT(*) as total_cycles
+        FROM agent_cycles
+        GROUP BY agent_name
+        ORDER BY last_cycle DESC
+      `).all();
+      res.json({ ok: true, agents });
+    } catch (err) {
+      log("error", `Agents API error: ${err}`);
+      res.status(500).json({ ok: false, error: "Internal server error" });
+    }
   });
 
   app.get("/api/agents/:name/cycles", (req, res) => {
-    const limit = parseInt(req.query.limit as string) || 20;
-    const cycles = db.prepare(
-      "SELECT * FROM agent_cycles WHERE agent_name = ? ORDER BY created_at DESC LIMIT ?"
-    ).all(req.params.name, limit);
-    res.json({ ok: true, cycles });
+    try {
+      const limit = Math.min(Math.max(parseInt(req.query.limit as string) || 20, 1), 100);
+      const cycles = db.prepare(
+        "SELECT * FROM agent_cycles WHERE agent_name = ? ORDER BY created_at DESC LIMIT ?"
+      ).all(req.params.name, limit);
+      res.json({ ok: true, cycles });
+    } catch (err) {
+      log("error", `Agent cycles API error: ${err}`);
+      res.status(500).json({ ok: false, error: "Internal server error" });
+    }
   });
 
   app.get("/api/agents/summary", (_req, res) => {
-    // Latest cycle per agent
-    const latest = db.prepare(`
-      SELECT ac.* FROM agent_cycles ac
-      INNER JOIN (
-        SELECT agent_name, MAX(id) as max_id FROM agent_cycles GROUP BY agent_name
-      ) latest ON ac.id = latest.max_id
-      ORDER BY ac.created_at DESC
-    `).all();
+    try {
+      const latest = db.prepare(`
+        SELECT ac.* FROM agent_cycles ac
+        INNER JOIN (
+          SELECT agent_name, MAX(id) as max_id FROM agent_cycles GROUP BY agent_name
+        ) latest ON ac.id = latest.max_id
+        ORDER BY ac.created_at DESC
+      `).all();
 
-    // Global stats
-    const stats = getTradeStats(db);
-    const remaining = budgetManager.getRemainingBudget();
-    const dailyLimit = budgetManager.getDailyLimit();
+      const stats = getTradeStats(db);
+      const remaining = budgetManager.getRemainingBudget();
+      const dailyLimit = budgetManager.getDailyLimit();
 
-    res.json({
-      ok: true,
-      agents: latest,
-      global: {
-        totalPnl: stats.totalPnl,
-        winRate: stats.winRate,
-        totalTrades: stats.total,
-        wins: stats.wins,
-        losses: stats.losses,
-        budgetUsed: dailyLimit - remaining,
-        budgetLimit: dailyLimit,
-        budgetRemaining: remaining,
-      },
-    });
+      res.json({
+        ok: true,
+        agents: latest,
+        global: {
+          totalPnl: stats.totalPnl,
+          winRate: stats.winRate,
+          totalTrades: stats.total,
+          wins: stats.wins,
+          losses: stats.losses,
+          budgetUsed: dailyLimit - remaining,
+          budgetLimit: dailyLimit,
+          budgetRemaining: remaining,
+        },
+      });
+    } catch (err) {
+      log("error", `Agent summary API error: ${err}`);
+      res.status(500).json({ ok: false, error: "Internal server error" });
+    }
   });
 
   app.get("/api/discover-traders", async (req, res) => {
@@ -136,7 +153,7 @@ export function startWebDashboard(
         res.json({ ok: false, error: "Invalid address" });
         return;
       }
-      addToWatchlist(db, { address, alias: alias || null, roi: 0, volume: volume || 0, pnl: pnl || 0, trade_count: 0 });
+      addToWatchlist(db, { address, alias: alias || null, roi: 0, volume: Number(volume) || 0, pnl: Number(pnl) || 0, trade_count: 0 });
       log("info", `Watchlist: added ${alias || address} via dashboard`);
       res.json({ ok: true });
     } catch (err) {
@@ -147,8 +164,8 @@ export function startWebDashboard(
   app.post("/api/watchlist/remove", (req, res) => {
     try {
       const { address } = req.body;
-      if (!address) { res.json({ ok: false, error: "Missing address" }); return; }
-      removeFromWatchlist(db, address);
+      if (!address || typeof address !== "string") { res.json({ ok: false, error: "Missing address" }); return; }
+      removeFromWatchlist(db, String(address));
       log("info", `Watchlist: removed ${address} via dashboard`);
       res.json({ ok: true });
     } catch (err) {

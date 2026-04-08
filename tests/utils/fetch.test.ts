@@ -43,4 +43,28 @@ describe("fetchWithRetry", () => {
     // retries=0 means 1 attempt total
     expect(fetchSpy).toHaveBeenCalledTimes(1);
   });
+
+  it("retries on 429 rate limit and succeeds", async () => {
+    const rateLimitResponse = new Response(null, { status: 429, headers: { "retry-after": "1" } });
+    const okResponse = Response.json({ data: "ok" });
+
+    const fetchSpy = vi.spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(rateLimitResponse)
+      .mockResolvedValueOnce(okResponse);
+
+    const res = await fetchWithRetry("https://example.com/api", { retries: 1, timeoutMs: 5000 });
+    expect(res.status).toBe(200);
+    expect(fetchSpy).toHaveBeenCalledTimes(2);
+  });
+
+  it("returns 429 response when retries exhausted", async () => {
+    const rateLimitResponse = () => new Response(null, { status: 429 });
+
+    vi.spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(rateLimitResponse())
+      .mockResolvedValueOnce(rateLimitResponse());
+
+    const res = await fetchWithRetry("https://example.com/api", { retries: 1, timeoutMs: 5000 });
+    expect(res.status).toBe(429);
+  });
 });

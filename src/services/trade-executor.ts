@@ -82,23 +82,31 @@ export class TradeExecutor {
 
     try {
       const client = await this.getClobClient();
+      const side = order.orderSide === "SELL" ? Side.SELL : Side.BUY;
       const resp = await client.createAndPostOrder(
         {
           tokenID: order.tokenId,
           price: order.price,
-          side: Side.BUY,
+          side,
           size: order.amount,
         },
         { tickSize: order.tickSize as "0.1" | "0.01" | "0.001" | "0.0001", negRisk: order.negRisk },
         order.orderType === "GTD" ? OrderType.GTD : OrderType.GTC
       );
 
+      // Validate CLOB response
+      if (!resp || resp.success === false || resp.errorMsg) {
+        const reason = resp?.errorMsg ?? "Order rejected by CLOB";
+        log("error", `[LIVE] Order rejected: ${reason}`, { order: order.marketSlug, response: resp });
+        return this.recordFailedTrade(order, reason);
+      }
+
       const tradeId = recordTrade(this.db, {
         trader_address: order.traderAddress,
         market_slug: order.marketSlug,
         condition_id: order.conditionId,
         token_id: order.tokenId,
-        side: "BUY",
+        side: order.orderSide ?? "BUY",
         price: order.price,
         amount: order.amount,
         original_amount: order.originalAmount,
@@ -106,30 +114,17 @@ export class TradeExecutor {
         status: "executed",
       });
 
-      log("trade", `[LIVE] Executed BUY $${order.amount} @ ${order.price} on ${order.marketSlug}`, {
+      log("trade", `[LIVE] Executed ${order.orderSide ?? "BUY"} $${order.amount} @ ${order.price} on ${order.marketSlug}`, {
         trader: order.traderAddress,
         tradeId,
-        response: resp,
+        orderID: resp.orderID ?? resp.orderIds,
       });
 
-      return { tradeId, mode: "live", status: "executed", message: `Executed: BUY $${order.amount} @ ${order.price}` };
-    } catch (err) {
-      const tradeId = recordTrade(this.db, {
-        trader_address: order.traderAddress,
-        market_slug: order.marketSlug,
-        condition_id: order.conditionId,
-        token_id: order.tokenId,
-        side: "BUY",
-        price: order.price,
-        amount: order.amount,
-        original_amount: order.originalAmount,
-        mode: "live",
-        status: "failed",
-      });
-
-      log("error", `[LIVE] Failed BUY on ${order.marketSlug}: ${err}`, { tradeId });
-
-      return { tradeId, mode: "live", status: "failed", message: `Failed: ${err}` };
+      return { tradeId, mode: "live", status: "executed", message: `Executed: ${order.orderSide ?? "BUY"} $${order.amount} @ ${order.price}` };
+    } catch (err: any) {
+      const message = err?.message ?? String(err);
+      log("error", `[LIVE] Failed ${order.orderSide ?? "BUY"} on ${order.marketSlug}: ${message}`);
+      return this.recordFailedTrade(order, message);
     }
   }
 
@@ -155,6 +150,7 @@ export class TradeExecutor {
   }
 
   async executeSell(order: TradeOrder): Promise<TradeResult> {
+    const sellOrder = { ...order, orderSide: "SELL" as const };
     if (this.mode === "preview") {
       const tradeId = recordTrade(this.db, {
         trader_address: order.traderAddress,
@@ -172,43 +168,23 @@ export class TradeExecutor {
       return { tradeId, mode: "preview", status: "simulated", message: `Simulated: SELL $${order.amount} @ ${order.price}` };
     }
 
-    if (!hasLiveCredentials()) {
-      return { tradeId: -1, mode: "live", status: "failed", message: "Live credentials not configured" };
-    }
+    return this.executeLiveTrade(sellOrder);
+  }
 
-    try {
-      const client = await this.getClobClient();
-      const orderType = order.orderType === "GTD" ? OrderType.GTD : OrderType.GTC;
-      const resp = await client.createAndPostOrder(
-        {
-          tokenID: order.tokenId,
-          price: order.price,
-          side: Side.SELL,
-          size: order.amount,
-        },
-        { tickSize: order.tickSize as any, negRisk: order.negRisk },
-        orderType
-      );
-
-      const tradeId = recordTrade(this.db, {
-        trader_address: order.traderAddress,
-        market_slug: order.marketSlug,
-        condition_id: order.conditionId,
-        token_id: order.tokenId,
-        side: "SELL",
-        price: order.price,
-        amount: order.amount,
-        original_amount: order.originalAmount,
-        mode: "live",
-        status: "executed",
-      });
-
-      log("trade", `[LIVE] Executed SELL $${order.amount} @ ${order.price} on ${order.marketSlug}`, { response: resp });
-      return { tradeId, mode: "live", status: "executed", message: `Executed: SELL $${order.amount} @ ${order.price}` };
-    } catch (err) {
-      log("error", `[LIVE] Failed SELL on ${order.marketSlug}: ${err}`);
-      return { tradeId: -1, mode: "live", status: "failed", message: `Failed: ${err}` };
-    }
+  private recordFailedTrade(order: TradeOrder, reason: string): TradeResult {
+    const tradeId = recordTrade(this.db, {
+      trader_address: order.traderAddress,
+      market_slug: order.marketSlug,
+      condition_id: order.conditionId,
+      token_id: order.tokenId,
+      side: order.orderSide ?? "BUY",
+      price: order.price,
+      amount: order.amount,
+      original_amount: order.originalAmount,
+      mode: "live",
+      status: "failed",
+    });
+    return { tradeId, mode: "live", status: "failed", message: `Failed: ${reason}` };
   }
 
   setMode(mode: "preview" | "live"): void {

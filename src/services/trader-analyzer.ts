@@ -36,14 +36,23 @@ export async function analyzeTrader(address: string, detailed: boolean): Promise
     outcome: a.outcome ?? "",
   }));
 
-  // Win rate: SELL trades where exit price > entry price indicate profit
-  // BUY = entry, SELL = exit. A SELL at higher price than avg BUY = win
+  // Win rate: SELL trades where exit price > avg entry price indicate profit
   const sells = trades.filter((t: RecentTrade) => t.side === "SELL");
   const buys = trades.filter((t: RecentTrade) => t.side === "BUY");
-  // Build avg entry price per market title
-  const avgEntry = new Map<string, number>();
+  // Build average entry price per market title
+  const entryPrices = new Map<string, { sum: number; count: number }>();
   for (const b of buys) {
-    avgEntry.set(b.title, b.price);
+    const existing = entryPrices.get(b.title);
+    if (existing) {
+      existing.sum += b.price;
+      existing.count++;
+    } else {
+      entryPrices.set(b.title, { sum: b.price, count: 1 });
+    }
+  }
+  const avgEntry = new Map<string, number>();
+  for (const [title, { sum, count }] of entryPrices) {
+    avgEntry.set(title, sum / count);
   }
   const wins = sells.filter((s: RecentTrade) => {
     const entry = avgEntry.get(s.title);

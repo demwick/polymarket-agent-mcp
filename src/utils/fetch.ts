@@ -2,7 +2,8 @@ import { log } from "./logger.js";
 
 const DEFAULT_TIMEOUT_MS = 10_000;
 const DEFAULT_RETRIES = 2;
-const RETRY_DELAY_MS = 1_000;
+const BASE_DELAY_MS = 1_000;
+const MAX_DELAY_MS = 30_000;
 
 export async function fetchWithRetry(
   url: string,
@@ -22,6 +23,21 @@ export async function fetchWithRetry(
       });
 
       clearTimeout(timer);
+
+      // Handle rate limiting — retry with backoff
+      if (response.status === 429) {
+        const retryAfter = parseRetryAfter(response.headers.get("retry-after"));
+        const delay = retryAfter ?? Math.min(BASE_DELAY_MS * 2 ** attempt, MAX_DELAY_MS);
+
+        if (attempt < retries) {
+          log("warn", `Rate limited (429) on ${url}, retrying in ${delay}ms...`);
+          await new Promise((r) => setTimeout(r, delay));
+          continue;
+        }
+        log("error", `Rate limited (429) on ${url} after ${retries + 1} attempts`);
+        return response;
+      }
+
       return response;
     } catch (err: any) {
       const isLast = attempt === retries;
@@ -33,10 +49,19 @@ export async function fetchWithRetry(
       }
 
       log("warn", `Fetch attempt ${attempt + 1} failed: ${url} (${reason}), retrying...`);
-      await new Promise((r) => setTimeout(r, RETRY_DELAY_MS * (attempt + 1)));
+      await new Promise((r) => setTimeout(r, BASE_DELAY_MS * (attempt + 1)));
     }
   }
 
   // Unreachable, but TypeScript needs it
   throw new Error("Fetch failed");
+}
+
+function parseRetryAfter(header: string | null): number | null {
+  if (!header) return null;
+  const seconds = parseInt(header, 10);
+  if (!isNaN(seconds)) return seconds * 1000;
+  const date = Date.parse(header);
+  if (!isNaN(date)) return Math.max(0, date - Date.now());
+  return null;
 }

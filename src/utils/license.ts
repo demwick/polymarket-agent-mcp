@@ -1,4 +1,5 @@
 import { log } from "./logger.js";
+import { fetchWithRetry } from "./fetch.js";
 
 let _isLicensed: boolean | null = null;
 
@@ -12,15 +13,16 @@ export async function checkLicense(): Promise<boolean> {
   }
 
   try {
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 5_000);
-    const response = await fetch("https://mcp-marketplace.io/api/v1/verify-license", {
+    const response = await fetchWithRetry("https://mcp-marketplace.io/api/v1/verify-license", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ key, slug: "polymarket-copy-trader" }),
-      signal: controller.signal,
+      retries: 1,
+      timeoutMs: 5_000,
     });
-    clearTimeout(timer);
+    if (!response.ok) {
+      throw new Error(`License API returned ${response.status}`);
+    }
     const data = await response.json();
     _isLicensed = data.valid === true;
   } catch {
