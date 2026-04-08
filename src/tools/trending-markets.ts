@@ -7,7 +7,7 @@ const GAMMA_API_BASE = "https://gamma-api.polymarket.com";
 export const trendingMarketsSchema = z.object({
   period: z.enum(["24h", "7d", "30d"]).optional().default("24h").describe("Volume period to rank by"),
   category: z.string().optional().describe("Filter by category (e.g. politics, sports, crypto)"),
-  limit: z.number().int().min(1).max(50).optional().default(15),
+  limit: z.number().int().min(1).max(50).optional().default(15).describe("Maximum number of trending markets to return"),
 });
 
 export async function handleTrendingMarkets(input: z.infer<typeof trendingMarketsSchema>): Promise<string> {

@@ -3,7 +3,7 @@ import { checkMarketQuality } from "../services/market-filter.js";
 import { checkLicense, requirePro } from "../utils/license.js";
 
 export const checkMarketSchema = z.object({
-  token_id: z.string(),
+  token_id: z.string().describe("Market token ID from the CLOB order book"),
   max_spread: z.number().min(0).max(1).optional().describe("Max acceptable spread (default: 0.10)"),
   min_depth: z.number().min(0).optional().describe("Min $ depth per side (default: $50)"),
 });

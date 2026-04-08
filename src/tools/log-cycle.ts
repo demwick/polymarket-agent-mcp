@@ -2,18 +2,18 @@ import { z } from "zod";
 import Database from "better-sqlite3";
 
 export const logCycleSchema = z.object({
-  agent_name: z.string(),
-  strategy: z.string(),
-  status: z.enum(["ok", "warning", "risk_alert", "error"]).default("ok"),
-  positions_open: z.number().int().default(0),
-  positions_closed: z.number().int().default(0),
-  realized_pnl: z.number().default(0),
-  unrealized_pnl: z.number().default(0),
-  win_rate: z.number().default(0),
-  budget_used: z.number().default(0),
-  budget_limit: z.number().default(0),
-  actions_taken: z.string().optional(),
-  notes: z.string().optional(),
+  agent_name: z.string().describe("Name of the AI agent logging this cycle"),
+  strategy: z.string().describe("Trading strategy used in this cycle (e.g. 'copy_top_traders', 'stink_bids')"),
+  status: z.enum(["ok", "warning", "risk_alert", "error"]).default("ok").describe("Cycle outcome: ok=normal, warning=minor issue, risk_alert=needs attention, error=failed"),
+  positions_open: z.number().int().default(0).describe("Number of currently open positions"),
+  positions_closed: z.number().int().default(0).describe("Number of positions closed this cycle"),
+  realized_pnl: z.number().default(0).describe("Realized profit/loss in USDC from closed positions"),
+  unrealized_pnl: z.number().default(0).describe("Unrealized profit/loss in USDC from open positions"),
+  win_rate: z.number().default(0).describe("Win rate as a decimal (0.0-1.0)"),
+  budget_used: z.number().default(0).describe("Amount of daily budget spent in USDC"),
+  budget_limit: z.number().default(0).describe("Total daily budget limit in USDC"),
+  actions_taken: z.string().optional().describe("Comma-separated list of actions taken (e.g. 'bought YES on Bitcoin market')"),
+  notes: z.string().optional().describe("Free-text notes about this cycle"),
 });
 
 export type LogCycleInput = z.infer<typeof logCycleSchema>;

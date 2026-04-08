@@ -4,7 +4,7 @@ import { validateLiveCredentials } from "../utils/config.js";
 import { checkLicense, requirePro } from "../utils/license.js";
 
 export const goLiveSchema = z.object({
-  confirm: z.boolean(),
+  confirm: z.boolean().describe("Must be true to confirm switching to live trading mode. This will place real orders with real money"),
 });
 
 export type GoLiveInput = z.infer<typeof goLiveSchema>;

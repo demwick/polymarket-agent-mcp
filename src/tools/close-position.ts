@@ -5,8 +5,8 @@ import { checkLicense, requirePro } from "../utils/license.js";
 import { log } from "../utils/logger.js";
 
 export const closePositionSchema = z.object({
-  trade_id: z.number().int(),
-  reason: z.string().optional().default("manual"),
+  trade_id: z.number().int().describe("ID of the trade/position to close (from get_positions)"),
+  reason: z.string().optional().default("manual").describe("Reason for closing (e.g. 'manual', 'stop_loss', 'take_profit')"),
 });
 
 export async function handleClosePosition(db: Database.Database, input: z.infer<typeof closePositionSchema>): Promise<string> {

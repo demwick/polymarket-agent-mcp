@@ -5,7 +5,7 @@ import { getMarketPriceByCondition } from "../services/price-service.js";
 import { log } from "../utils/logger.js";
 
 export const optimizePortfolioSchema = z.object({
-  strategy: z.enum(["conservative", "balanced", "aggressive"]).optional().default("balanced"),
+  strategy: z.enum(["conservative", "balanced", "aggressive"]).optional().default("balanced").describe("Risk strategy: conservative=tight SL/TP, balanced=moderate risk, aggressive=wider thresholds for max growth"),
 });
 
 export async function handleOptimizePortfolio(db: Database.Database, input: z.infer<typeof optimizePortfolioSchema>): Promise<string> {

@@ -5,8 +5,8 @@ import Database from "better-sqlite3";
 import { getOpenPositions } from "../db/queries.js";
 
 export const getPriceSchema = z.object({
-  condition_id: z.string().optional(),
-  show_positions: z.boolean().optional().default(false),
+  condition_id: z.string().optional().describe("Polymarket market condition ID. Omit to show prices for all open positions"),
+  show_positions: z.boolean().optional().default(false).describe("Include current position value alongside price data"),
 });
 
 export async function handleGetPrice(db: Database.Database, input: z.infer<typeof getPriceSchema>): Promise<string> {

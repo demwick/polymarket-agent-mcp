@@ -5,7 +5,7 @@ import { getWatchlistCount } from "../db/queries.js";
 import { checkLicense, requirePro } from "../utils/license.js";
 
 export const startMonitorSchema = z.object({
-  interval_seconds: z.number().int().min(10).max(300).optional().default(30),
+  interval_seconds: z.number().int().min(10).max(300).optional().default(30).describe("Polling interval in seconds between wallet checks (10-300)"),
 });
 
 export type StartMonitorInput = z.infer<typeof startMonitorSchema>;

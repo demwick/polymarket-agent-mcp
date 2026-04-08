@@ -5,10 +5,10 @@ import { resolveMarketByConditionId } from "../services/market-resolver.js";
 import { log } from "../utils/logger.js";
 
 const orderSchema = z.object({
-  condition_id: z.string(),
-  amount: z.number().min(0.5),
-  price: z.number().min(0.01).max(0.99).optional(),
-  side: z.enum(["BUY", "SELL"]).optional().default("BUY"),
+  condition_id: z.string().describe("Polymarket market condition ID (hex string)"),
+  amount: z.number().min(0.5).describe("Amount in USDC to trade"),
+  price: z.number().min(0.01).max(0.99).optional().describe("Limit price (0.01-0.99). Omit for market price"),
+  side: z.enum(["BUY", "SELL"]).optional().default("BUY").describe("Order side: BUY to open a position, SELL to close"),
 });
 
 export const batchOrderSchema = z.object({

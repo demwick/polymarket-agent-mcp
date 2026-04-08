@@ -2,8 +2,8 @@ import { z } from "zod";
 import { PriceStream } from "../services/price-stream.js";
 
 export const watchPriceSchema = z.object({
-  action: z.enum(["subscribe", "unsubscribe", "status"]).default("status"),
-  token_id: z.string().optional(),
+  action: z.enum(["subscribe", "unsubscribe", "status"]).default("status").describe("subscribe=start streaming, unsubscribe=stop streaming, status=show connection info"),
+  token_id: z.string().optional().describe("Market token ID to subscribe/unsubscribe. Required for subscribe/unsubscribe, omit for status"),
 });
 
 export function handleWatchPrice(priceStream: PriceStream, input: z.infer<typeof watchPriceSchema>): string {

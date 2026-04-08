@@ -5,11 +5,11 @@ import { addToWatchlist, getWatchlistCount } from "../db/queries.js";
 import { checkLicense, requirePro } from "../utils/license.js";
 
 export const discoverTradersSchema = z.object({
-  pages: z.number().int().min(1).max(10).optional().default(3),
-  period: z.enum(["ALL", "WEEK"]).optional().default("ALL"),
-  min_volume: z.number().optional().default(1000),
-  min_pnl: z.number().optional().default(0),
-  auto_watch: z.boolean().optional().default(false),
+  pages: z.number().int().min(1).max(10).optional().default(3).describe("Number of leaderboard pages to fetch (1 page = 25 traders)"),
+  period: z.enum(["ALL", "WEEK"]).optional().default("ALL").describe("Leaderboard time range: ALL for all-time, WEEK for last 7 days"),
+  min_volume: z.number().optional().default(1000).describe("Minimum total trading volume in USDC to include a trader"),
+  min_pnl: z.number().optional().default(0).describe("Minimum profit/loss in USDC to include a trader"),
+  auto_watch: z.boolean().optional().default(false).describe("Automatically add discovered traders to your watchlist"),
 });
 
 export type DiscoverTradersInput = z.infer<typeof discoverTradersSchema>;

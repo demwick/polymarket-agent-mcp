@@ -5,7 +5,7 @@ import { getPriceHistory } from "../services/price-history.js";
 import { log } from "../utils/logger.js";
 
 export const analyzeOpportunitySchema = z.object({
-  condition_id: z.string(),
+  condition_id: z.string().describe("Polymarket market condition ID to analyze for trading opportunity"),
 });
 
 export async function handleAnalyzeOpportunity(input: z.infer<typeof analyzeOpportunitySchema>): Promise<string> {

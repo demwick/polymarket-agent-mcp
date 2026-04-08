@@ -5,8 +5,8 @@ import { BudgetManager } from "../services/budget-manager.js";
 import { checkLicense, requirePro } from "../utils/license.js";
 
 export const setConfigSchema = z.object({
-  key: z.enum(["daily_budget", "min_conviction"]),
-  value: z.string(),
+  key: z.enum(["daily_budget", "min_conviction"]).describe("Config key: daily_budget=max USDC spend per day, min_conviction=minimum trade size in USDC to copy"),
+  value: z.string().describe("New value as a string (e.g. '50' for $50 daily budget)"),
 });
 
 export type SetConfigInput = z.infer<typeof setConfigSchema>;

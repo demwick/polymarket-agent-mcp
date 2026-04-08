@@ -5,8 +5,8 @@ import { log } from "../utils/logger.js";
 const GAMMA_API_BASE = "https://gamma-api.polymarket.com";
 
 export const featuredMarketsSchema = z.object({
-  category: z.enum(["politics", "sports", "crypto", "pop-culture", "business", "science"]).optional().describe("Filter by category"),
-  limit: z.number().int().min(1).max(30).optional().default(15),
+  category: z.enum(["politics", "sports", "crypto", "pop-culture", "business", "science"]).optional().describe("Filter by market category: politics, sports, crypto, pop-culture, business, or science"),
+  limit: z.number().int().min(1).max(30).optional().default(15).describe("Maximum number of markets to return"),
 });
 
 export async function handleFeaturedMarkets(input: z.infer<typeof featuredMarketsSchema>): Promise<string> {

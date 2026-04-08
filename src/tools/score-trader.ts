@@ -3,7 +3,7 @@ import { scoreTrader } from "../services/conviction-scorer.js";
 import { checkLicense, requirePro } from "../utils/license.js";
 
 export const scoreTraderSchema = z.object({
-  address: z.string(),
+  address: z.string().describe("Trader's Ethereum wallet address (0x...) to score"),
 });
 
 export async function handleScoreTrader(input: z.infer<typeof scoreTraderSchema>): Promise<string> {

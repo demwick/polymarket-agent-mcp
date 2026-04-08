@@ -4,9 +4,9 @@ import { addToWatchlist, removeFromWatchlist, getWatchlistCount } from "../db/qu
 import { checkLicense, requirePro } from "../utils/license.js";
 
 export const watchWalletSchema = z.object({
-  address: z.string().regex(/^0x[a-fA-F0-9]{40}$/, "Invalid Ethereum address"),
-  alias: z.string().optional(),
-  action: z.enum(["add", "remove"]).default("add"),
+  address: z.string().regex(/^0x[a-fA-F0-9]{40}$/, "Invalid Ethereum address").describe("Ethereum wallet address to watch (0x followed by 40 hex characters)"),
+  alias: z.string().optional().describe("Friendly name for this wallet (e.g. 'whale_trader_1')"),
+  action: z.enum(["add", "remove"]).default("add").describe("add=start watching this wallet, remove=stop watching"),
 });
 
 export type WatchWalletInput = z.infer<typeof watchWalletSchema>;

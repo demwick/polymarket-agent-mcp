@@ -3,7 +3,7 @@ import { getPriceHistory, type Interval } from "../services/price-history.js";
 import { checkLicense, requirePro } from "../utils/license.js";
 
 export const getPriceHistorySchema = z.object({
-  token_id: z.string(),
+  token_id: z.string().describe("Market token ID to fetch price history for"),
   interval: z.enum(["1h", "6h", "1d", "1w", "1m"]).optional().default("1d").describe("Time window: 1h, 6h, 1d, 1w, or 1m"),
 });
 

@@ -6,8 +6,8 @@ const GAMMA_API_BASE = "https://gamma-api.polymarket.com";
 
 export const searchMarketsSchema = z.object({
   query: z.string().min(1).describe("Search query (e.g. 'bitcoin', 'election', 'UFC')"),
-  limit: z.number().int().min(1).max(50).optional().default(10),
-  active_only: z.boolean().optional().default(true),
+  limit: z.number().int().min(1).max(50).optional().default(10).describe("Maximum number of markets to return"),
+  active_only: z.boolean().optional().default(true).describe("Only return active (non-resolved) markets"),
 });
 
 export async function handleSearchMarkets(input: z.infer<typeof searchMarketsSchema>): Promise<string> {

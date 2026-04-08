@@ -7,10 +7,10 @@ import { checkLicense, requirePro } from "../utils/license.js";
 import { log } from "../utils/logger.js";
 
 export const buySchema = z.object({
-  condition_id: z.string(),
+  condition_id: z.string().describe("Polymarket market condition ID (hex string from market URL or API)"),
   amount: z.number().min(0.5).describe("Amount in USDC to spend"),
-  price: z.number().min(0.01).max(0.99).optional().describe("Limit price (omit for market price from order book)"),
-  outcome: z.enum(["YES", "NO"]).optional().default("YES"),
+  price: z.number().min(0.01).max(0.99).optional().describe("Limit price (0.01-0.99). Omit for market price from order book"),
+  outcome: z.enum(["YES", "NO"]).optional().default("YES").describe("Outcome to buy: YES for the event happening, NO for it not happening"),
 });
 
 export async function handleBuy(db: Database.Database, executor: TradeExecutor, input: z.infer<typeof buySchema>): Promise<string> {

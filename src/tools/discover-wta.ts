@@ -3,7 +3,7 @@ import { discoverWtaMarkets } from "../services/wta-discovery.js";
 import { checkLicense, requirePro } from "../utils/license.js";
 
 export const discoverWtaSchema = z.object({
-  discount_pct: z.number().min(5).max(50).optional().default(30),
+  discount_pct: z.number().min(5).max(50).optional().default(30).describe("Minimum discount percentage below fair price to qualify as a stink bid opportunity (5-50%)"),
 });
 
 export type DiscoverWtaInput = z.infer<typeof discoverWtaSchema>;

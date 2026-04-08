@@ -3,8 +3,8 @@ import { getTraderOpenPositions } from "../services/trader-analyzer.js";
 import { checkLicense, requirePro } from "../utils/license.js";
 
 export const getTraderPositionsSchema = z.object({
-  address: z.string(),
-  limit: z.number().int().min(1).max(100).optional().default(20),
+  address: z.string().describe("Trader's Ethereum wallet address (0x...)"),
+  limit: z.number().int().min(1).max(100).optional().default(20).describe("Maximum number of positions to return"),
 });
 
 export async function handleGetTraderPositions(input: z.infer<typeof getTraderPositionsSchema>): Promise<string> {

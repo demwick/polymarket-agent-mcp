@@ -6,10 +6,10 @@ import { checkLicense, requirePro } from "../utils/license.js";
 const GAMMA_API_BASE = "https://gamma-api.polymarket.com";
 
 export const discoverMarketsSchema = z.object({
-  ending: z.enum(["today", "this_week", "all"]).optional().default("today"),
-  category: z.string().optional(),
-  min_volume: z.number().optional().default(100),
-  limit: z.number().int().min(1).max(50).optional().default(20),
+  ending: z.enum(["today", "this_week", "all"]).optional().default("today").describe("Filter by resolution deadline: today, this_week, or all active markets"),
+  category: z.string().optional().describe("Filter by category (e.g. politics, sports, crypto, pop-culture)"),
+  min_volume: z.number().optional().default(100).describe("Minimum trading volume in USDC to include a market"),
+  limit: z.number().int().min(1).max(50).optional().default(20).describe("Maximum number of markets to return"),
 });
 
 export type DiscoverMarketsInput = z.infer<typeof discoverMarketsSchema>;

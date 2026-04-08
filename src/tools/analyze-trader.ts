@@ -3,7 +3,7 @@ import { analyzeTrader } from "../services/trader-analyzer.js";
 import { checkLicense } from "../utils/license.js";
 
 export const analyzeTraderSchema = z.object({
-  address: z.string(),
+  address: z.string().describe("Trader's Ethereum wallet address (0x...) to analyze"),
 });
 
 export async function handleAnalyzeTrader(input: z.infer<typeof analyzeTraderSchema>): Promise<string> {

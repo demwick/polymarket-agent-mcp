@@ -4,9 +4,9 @@ import { getTradeHistory } from "../db/queries.js";
 import { checkLicense, requirePro } from "../utils/license.js";
 
 export const tradeHistorySchema = z.object({
-  limit: z.number().int().min(1).max(100).optional().default(20),
-  trader: z.string().optional(),
-  status: z.string().optional(),
+  limit: z.number().int().min(1).max(100).optional().default(20).describe("Maximum number of trades to return"),
+  trader: z.string().optional().describe("Filter by trader wallet address (0x...)"),
+  status: z.string().optional().describe("Filter by trade status: open, closed, or won"),
 });
 
 export type TradeHistoryInput = z.infer<typeof tradeHistorySchema>;

@@ -5,8 +5,8 @@ import { log } from "../utils/logger.js";
 const DATA_API_BASE = "https://data-api.polymarket.com";
 
 export const getTopHoldersSchema = z.object({
-  condition_id: z.string(),
-  limit: z.number().int().min(1).max(50).optional().default(10),
+  condition_id: z.string().describe("Polymarket market condition ID to find top holders for"),
+  limit: z.number().int().min(1).max(50).optional().default(10).describe("Maximum number of top holders to return"),
 });
 
 export async function handleGetTopHolders(input: z.infer<typeof getTopHoldersSchema>): Promise<string> {

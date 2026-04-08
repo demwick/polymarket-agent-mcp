@@ -4,7 +4,7 @@ import { getPositionsByStatus } from "../db/queries.js";
 import { checkLicense } from "../utils/license.js";
 
 export const getPositionsSchema = z.object({
-  status: z.enum(["open", "closed", "all"]).optional().default("open"),
+  status: z.enum(["open", "closed", "all"]).optional().default("open").describe("Filter positions: open=active, closed=resolved/exited, all=both"),
 });
 
 export async function handleGetPositions(db: Database.Database, input: z.infer<typeof getPositionsSchema>): Promise<string> {
