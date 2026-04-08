@@ -17,6 +17,7 @@ import { safe } from "./utils/tool-wrapper.js";
 import { BudgetManager } from "./services/budget-manager.js";
 import { TradeExecutor } from "./services/trade-executor.js";
 import { WalletMonitor } from "./services/wallet-monitor.js";
+import { PriceStream } from "./services/price-stream.js";
 
 import { discoverTradersSchema, handleDiscoverTraders } from "./tools/discover-traders.js";
 import { watchWalletSchema, handleWatchWallet } from "./tools/watch-wallet.js";
@@ -67,6 +68,7 @@ import { getMarketEventsSchema, handleGetMarketEvents } from "./tools/get-market
 import { compareMarketsSchema, handleCompareMarkets } from "./tools/compare-markets.js";
 import { featuredMarketsSchema, handleFeaturedMarkets } from "./tools/featured-markets.js";
 import { optimizePortfolioSchema, handleOptimizePortfolio } from "./tools/optimize-portfolio.js";
+import { watchPriceSchema, handleWatchPrice } from "./tools/watch-price.js";
 
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -80,6 +82,7 @@ const budgetManager = new BudgetManager(db, config.DAILY_BUDGET);
 const tradeExecutor = new TradeExecutor(db, config.COPY_MODE);
 const positionTracker = new PositionTracker(db);
 const walletMonitor = new WalletMonitor(db, budgetManager, tradeExecutor, config.MIN_CONVICTION, 300, positionTracker);
+const priceStream = new PriceStream();
 
 const server = new McpServer({
   name: "polymarket-trader-mcp",
@@ -415,6 +418,13 @@ server.tool(
   safe("optimize_portfolio", async (input) => ({ content: [{ type: "text" as const, text: await handleOptimizePortfolio(db, optimizePortfolioSchema.parse(input)) }] }))
 );
 
+server.tool(
+  "watch_price",
+  "Subscribe to live WebSocket price stream for real-time updates on a market",
+  watchPriceSchema.shape,
+  safe("watch_price", (input) => ({ content: [{ type: "text" as const, text: handleWatchPrice(priceStream, watchPriceSchema.parse(input)) }] }))
+);
+
 // Start MCP server
 async function main() {
   log("info", "Starting Polymarket Trader MCP Server");
@@ -442,6 +452,7 @@ main().catch((err) => {
 function shutdown() {
   log("info", "Shutting down...");
   walletMonitor.stop();
+  priceStream.disconnect();
   db.close();
   process.exit(0);
 }
