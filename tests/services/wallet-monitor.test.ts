@@ -26,4 +26,14 @@ describe("filterNewTrades", () => {
     expect(result.find((t) => t.conditionId === "c1")).toBeDefined();
     expect(result.find((t) => t.conditionId === "c3")).toBeUndefined();
   });
+
+  it("handles Unix epoch timestamps (number)", () => {
+    const epochActivities: RawActivity[] = [
+      { type: "TRADE", side: "BUY", size: 100, price: 0.50, asset: "tok5", timestamp: Math.floor(now / 1000) - 30, conditionId: "c5", title: "Market E", outcome: "Yes", transactionHash: "0x5" },
+    ];
+    const result = filterNewTrades(epochActivities, 0, 300);
+    expect(result).toHaveLength(1);
+    expect(result[0].size).toBe(100);
+    expect(result[0].price).toBe(0.50);
+  });
 });

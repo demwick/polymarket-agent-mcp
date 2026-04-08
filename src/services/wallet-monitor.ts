@@ -11,10 +11,10 @@ const DATA_API_BASE = "https://data-api.polymarket.com";
 export interface RawActivity {
   type: string;
   side: string;
-  size: string;
-  price: string;
+  size: number | string;
+  price: number | string;
   asset: string;
-  timestamp: string;
+  timestamp: number | string;
   conditionId: string;
   title: string;
   outcome: string;
@@ -43,23 +43,36 @@ export function filterNewTrades(
   return activities
     .filter((a) => {
       if (a.type !== "TRADE" || a.side !== "BUY") return false;
-      const age = (now - new Date(a.timestamp).getTime()) / 1000;
+      // timestamp can be Unix epoch (seconds) or ISO string
+      const ts = typeof a.timestamp === "number"
+        ? a.timestamp * 1000
+        : new Date(a.timestamp).getTime();
+      const age = (now - ts) / 1000;
       if (age > maxAgeSeconds) return false;
-      const invested = parseFloat(a.size) * parseFloat(a.price);
+      const size = typeof a.size === "number" ? a.size : parseFloat(a.size);
+      const price = typeof a.price === "number" ? a.price : parseFloat(a.price);
+      const invested = size * price;
       if (invested < minConviction) return false;
       return true;
     })
-    .map((a) => ({
-      side: a.side,
-      size: parseFloat(a.size),
-      price: parseFloat(a.price),
-      asset: a.asset,
-      conditionId: a.conditionId,
-      title: a.title,
-      outcome: a.outcome,
-      timestamp: a.timestamp,
-      investedAmount: parseFloat(a.size) * parseFloat(a.price),
-    }));
+    .map((a) => {
+      const size = typeof a.size === "number" ? a.size : parseFloat(a.size);
+      const price = typeof a.price === "number" ? a.price : parseFloat(a.price);
+      const ts = typeof a.timestamp === "number"
+        ? new Date(a.timestamp * 1000).toISOString()
+        : a.timestamp;
+      return {
+        side: a.side,
+        size,
+        price,
+        asset: a.asset,
+        conditionId: a.conditionId,
+        title: a.title,
+        outcome: a.outcome,
+        timestamp: ts,
+        investedAmount: size * price,
+      };
+    });
 }
 
 async function fetchWalletActivity(address: string): Promise<RawActivity[]> {
