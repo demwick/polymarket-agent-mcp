@@ -56,6 +56,11 @@ import { searchMarketsSchema, handleSearchMarkets } from "./tools/search-markets
 import { detectArbitrageSchema, handleDetectArbitrage } from "./tools/detect-arbitrage.js";
 import { findRelatedSchema, handleFindRelated } from "./tools/find-related.js";
 import { getTopHoldersSchema, handleGetTopHolders } from "./tools/get-top-holders.js";
+import { trendingMarketsSchema, handleTrendingMarkets } from "./tools/trending-markets.js";
+import { analyzeOpportunitySchema, handleAnalyzeOpportunity } from "./tools/analyze-opportunity.js";
+import { handleAssessRisk } from "./tools/assess-risk.js";
+import { batchOrderSchema, handleBatchOrder } from "./tools/batch-order.js";
+import { setSafetyLimitsSchema, handleSetSafetyLimits } from "./tools/set-safety-limits.js";
 
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -325,6 +330,41 @@ server.tool(
   "See the biggest position holders in a market — who's betting big",
   getTopHoldersSchema.shape,
   safe("get_top_holders", async (input) => ({ content: [{ type: "text" as const, text: await handleGetTopHolders(getTopHoldersSchema.parse(input)) }] }))
+);
+
+server.tool(
+  "trending_markets",
+  "Show trending markets by volume — 24h, 7d, or 30d with optional category filter",
+  trendingMarketsSchema.shape,
+  safe("trending_markets", async (input) => ({ content: [{ type: "text" as const, text: await handleTrendingMarkets(trendingMarketsSchema.parse(input)) }] }))
+);
+
+server.tool(
+  "analyze_opportunity",
+  "AI-powered BUY/SELL/HOLD recommendation for a market based on price, spread, trend, and liquidity",
+  analyzeOpportunitySchema.shape,
+  safe("analyze_opportunity", async (input) => ({ content: [{ type: "text" as const, text: await handleAnalyzeOpportunity(analyzeOpportunitySchema.parse(input)) }] }))
+);
+
+server.tool(
+  "assess_risk",
+  "Portfolio risk assessment — concentration, diversification, protection coverage, and budget usage",
+  {},
+  safe("assess_risk", async () => ({ content: [{ type: "text" as const, text: await handleAssessRisk(db, budgetManager) }] }))
+);
+
+server.tool(
+  "batch_order",
+  "Execute multiple buy/sell orders at once (max 10)",
+  batchOrderSchema.shape,
+  safe("batch_order", async (input) => ({ content: [{ type: "text" as const, text: await handleBatchOrder(db, tradeExecutor, batchOrderSchema.parse(input)) }] }))
+);
+
+server.tool(
+  "set_safety_limits",
+  "Configure trading safety limits — max order size, exposure cap, spread tolerance",
+  setSafetyLimitsSchema.shape,
+  safe("set_safety_limits", (input) => ({ content: [{ type: "text" as const, text: handleSetSafetyLimits(db, setSafetyLimitsSchema.parse(input)) }] }))
 );
 
 // Start MCP server
