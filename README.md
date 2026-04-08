@@ -1,7 +1,5 @@
 # Polymarket Trader MCP Server
 
-[![npm version](https://img.shields.io/npm/v/polymarket-trader-mcp)](https://www.npmjs.com/package/polymarket-trader-mcp)
-[![npm downloads](https://img.shields.io/npm/dm/polymarket-trader-mcp)](https://www.npmjs.com/package/polymarket-trader-mcp)
 [![Node.js](https://img.shields.io/badge/node-18%2B-brightgreen)](https://nodejs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-blue)](https://www.typescriptlang.org)
 [![MCP Protocol](https://img.shields.io/badge/MCP-1.0-purple)](https://modelcontextprotocol.io)
