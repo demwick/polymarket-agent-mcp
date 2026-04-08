@@ -1,0 +1,12 @@
+services:
+  polymarket-trader:
+    build: .
+    stdin_open: true
+    environment:
+      - COPY_MODE=preview
+      - DAILY_BUDGET=20
+      - MIN_CONVICTION=3
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data
