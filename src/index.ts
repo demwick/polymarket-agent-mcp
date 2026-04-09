@@ -3,7 +3,6 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import { createServer } from "http";
-import { randomUUID } from "crypto";
 import Database from "better-sqlite3";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -455,10 +454,7 @@ async function main() {
 async function startHttpServer() {
   const port = parseInt(process.env.PORT || "3000", 10);
 
-  const httpTransport = new StreamableHTTPServerTransport({
-    sessionIdGenerator: () => randomUUID(),
-  });
-
+  const httpTransport = new StreamableHTTPServerTransport({ sessionIdGenerator: undefined });
   await server.connect(httpTransport);
 
   const httpServer = createServer(async (req, res) => {
@@ -477,7 +473,7 @@ async function startHttpServer() {
       return;
     }
 
-    // Root redirect
+    // Root info
     if (url.pathname === "/") {
       res.writeHead(200, { "Content-Type": "application/json" });
       res.end(JSON.stringify({
