@@ -14,6 +14,7 @@ const configSchema = z.object({
   COPY_MODE: z.enum(["preview", "live"]).default("preview"),
   CHAIN_ID: z.coerce.number().int().positive().default(137),
   MCP_LICENSE_KEY: z.string().optional().default(""),
+  MCP_API_KEY: z.string().optional().default(""),
 });
 
 export type Config = z.infer<typeof configSchema>;

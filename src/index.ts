@@ -526,6 +526,16 @@ async function startHttpServer() {
 
     // MCP endpoint
     if (url.pathname === "/mcp") {
+      // Bearer token auth when MCP_API_KEY is configured
+      const apiKey = process.env.MCP_API_KEY;
+      if (apiKey) {
+        const authHeader = req.headers.authorization;
+        if (!authHeader || authHeader !== `Bearer ${apiKey}`) {
+          res.writeHead(401, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({ error: "Unauthorized", message: "Valid Bearer token required" }));
+          return;
+        }
+      }
       try {
         await httpTransport.handleRequest(req, res);
       } catch (err) {
