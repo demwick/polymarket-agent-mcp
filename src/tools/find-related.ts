@@ -7,7 +7,7 @@ const GAMMA_API_BASE = "https://gamma-api.polymarket.com";
 export const findRelatedSchema = z.object({
   condition_id: z.string().optional().describe("Find markets related to this market"),
   query: z.string().optional().describe("Keyword to find related markets (e.g. 'bitcoin', 'trump')"),
-  limit: z.number().int().min(1).max(30).optional().default(10),
+  limit: z.number().int().min(1).max(30).optional().default(10).describe("Maximum number of related markets to return"),
 });
 
 export async function handleFindRelated(input: z.infer<typeof findRelatedSchema>): Promise<string> {

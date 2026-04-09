@@ -4,7 +4,7 @@ import { setExitRules } from "../db/queries.js";
 import { checkLicense, requirePro } from "../utils/license.js";
 
 export const setExitRulesSchema = z.object({
-  trade_id: z.number().int(),
+  trade_id: z.number().int().describe("ID of the open position to set exit rules on (from get_positions)"),
   stop_loss: z.number().min(0).max(1).optional().describe("Price at which to sell (stop-loss). E.g. 0.30 means sell if price drops to $0.30"),
   take_profit: z.number().min(0).max(1).optional().describe("Price at which to sell (take-profit). E.g. 0.85 means sell if price rises to $0.85"),
 });

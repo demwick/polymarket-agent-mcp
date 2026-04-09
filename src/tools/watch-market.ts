@@ -5,9 +5,9 @@ import { getMarketPriceByCondition } from "../services/price-service.js";
 import { checkLicense, requirePro } from "../utils/license.js";
 
 export const watchMarketSchema = z.object({
-  action: z.enum(["add", "remove", "list"]).default("list"),
-  condition_id: z.string().optional(),
-  title: z.string().optional(),
+  action: z.enum(["add", "remove", "list"]).default("list").describe("Action to perform: add, remove, or list watched markets"),
+  condition_id: z.string().optional().describe("Market condition ID to add or remove from watchlist"),
+  title: z.string().optional().describe("Friendly name for the market (shown in watchlist)"),
   alert_below: z.number().min(0).max(1).optional().describe("Alert when price drops below this level"),
   alert_above: z.number().min(0).max(1).optional().describe("Alert when price rises above this level"),
 });

@@ -7,8 +7,8 @@ import { checkLicense, requirePro } from "../utils/license.js";
 import { log } from "../utils/logger.js";
 
 export const placeStinkBidSchema = z.object({
-  discount_pct: z.number().min(5).max(50).optional().default(30),
-  bet_size: z.number().min(1).max(50).optional().default(5),
+  discount_pct: z.number().min(5).max(50).optional().default(30).describe("Discount percentage below fair price to place the bid (5-50%)"),
+  bet_size: z.number().min(1).max(50).optional().default(5).describe("USDC amount per stink bid order (1-50)"),
 });
 
 export type PlaceStinkBidInput = z.infer<typeof placeStinkBidSchema>;

@@ -7,7 +7,7 @@ const GAMMA_API_BASE = "https://gamma-api.polymarket.com";
 export const getMarketEventsSchema = z.object({
   slug: z.string().optional().describe("Event slug to look up (e.g. 'us-presidential-election-2026')"),
   query: z.string().optional().describe("Search events by keyword"),
-  limit: z.number().int().min(1).max(30).optional().default(10),
+  limit: z.number().int().min(1).max(30).optional().default(10).describe("Maximum number of events to return"),
 });
 
 export async function handleGetMarketEvents(input: z.infer<typeof getMarketEventsSchema>): Promise<string> {

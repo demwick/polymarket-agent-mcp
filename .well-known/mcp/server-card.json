@@ -1,8 +1,11 @@
 {
   "serverInfo": {
-    "name": "polymarket-trader-mcp",
+    "name": "Polymarket Trader MCP",
     "version": "1.4.0"
   },
+  "description": "Trade, analyze, and automate Polymarket prediction markets via AI. 48 tools for direct trading, smart money flow detection, copy trading, backtesting, and portfolio management.",
+  "homepage": "https://github.com/demwick/polymarket-trader-mcp",
+  "icon": "https://raw.githubusercontent.com/demwick/polymarket-trader-mcp/main/assets/icon.svg",
   "tools": [
     {
       "name": "discover_traders",
@@ -43,6 +46,9 @@
             "type": "boolean"
           }
         }
+      },
+      "annotations": {
+        "readOnlyHint": true
       }
     },
     {
@@ -74,6 +80,9 @@
         "required": [
           "address"
         ]
+      },
+      "annotations": {
+        "readOnlyHint": false
       }
     },
     {
@@ -83,6 +92,9 @@
         "$schema": "http://json-schema.org/draft-07/schema#",
         "type": "object",
         "properties": {}
+      },
+      "annotations": {
+        "readOnlyHint": true
       }
     },
     {
@@ -100,6 +112,9 @@
             "maximum": 300
           }
         }
+      },
+      "annotations": {
+        "readOnlyHint": false
       }
     },
     {
@@ -109,6 +124,9 @@
         "$schema": "http://json-schema.org/draft-07/schema#",
         "type": "object",
         "properties": {}
+      },
+      "annotations": {
+        "readOnlyHint": false
       }
     },
     {
@@ -118,6 +136,9 @@
         "$schema": "http://json-schema.org/draft-07/schema#",
         "type": "object",
         "properties": {}
+      },
+      "annotations": {
+        "readOnlyHint": true
       }
     },
     {
@@ -143,6 +164,9 @@
             "type": "string"
           }
         }
+      },
+      "annotations": {
+        "readOnlyHint": true
       }
     },
     {
@@ -169,6 +193,9 @@
           "key",
           "value"
         ]
+      },
+      "annotations": {
+        "readOnlyHint": false
       }
     },
     {
@@ -186,6 +213,9 @@
         "required": [
           "confirm"
         ]
+      },
+      "annotations": {
+        "destructiveHint": true
       }
     },
     {
@@ -203,6 +233,9 @@
         "required": [
           "address"
         ]
+      },
+      "annotations": {
+        "readOnlyHint": true
       }
     },
     {
@@ -227,6 +260,9 @@
         "required": [
           "address"
         ]
+      },
+      "annotations": {
+        "readOnlyHint": true
       }
     },
     {
@@ -247,6 +283,9 @@
             ]
           }
         }
+      },
+      "annotations": {
+        "readOnlyHint": true
       }
     },
     {
@@ -271,6 +310,9 @@
         "required": [
           "trade_id"
         ]
+      },
+      "annotations": {
+        "destructiveHint": true
       }
     },
     {
@@ -307,6 +349,9 @@
             "maximum": 50
           }
         }
+      },
+      "annotations": {
+        "readOnlyHint": true
       }
     },
     {
@@ -326,6 +371,9 @@
             "type": "boolean"
           }
         }
+      },
+      "annotations": {
+        "readOnlyHint": true
       }
     },
     {
@@ -343,6 +391,9 @@
             "maximum": 50
           }
         }
+      },
+      "annotations": {
+        "readOnlyHint": true
       }
     },
     {
@@ -354,17 +405,22 @@
         "properties": {
           "discount_pct": {
             "default": 30,
+            "description": "Discount percentage below fair price to place the bid (5-50%)",
             "type": "number",
             "minimum": 5,
             "maximum": 50
           },
           "bet_size": {
             "default": 5,
+            "description": "USDC amount per stink bid order (1-50)",
             "type": "number",
             "minimum": 1,
             "maximum": 50
           }
         }
+      },
+      "annotations": {
+        "readOnlyHint": false
       }
     },
     {
@@ -374,6 +430,9 @@
         "$schema": "http://json-schema.org/draft-07/schema#",
         "type": "object",
         "properties": {}
+      },
+      "annotations": {
+        "destructiveHint": true
       }
     },
     {
@@ -383,6 +442,9 @@
         "$schema": "http://json-schema.org/draft-07/schema#",
         "type": "object",
         "properties": {}
+      },
+      "annotations": {
+        "readOnlyHint": true
       }
     },
     {
@@ -463,6 +525,9 @@
           "agent_name",
           "strategy"
         ]
+      },
+      "annotations": {
+        "readOnlyHint": false
       }
     },
     {
@@ -475,7 +540,8 @@
           "trade_id": {
             "type": "integer",
             "minimum": -9007199254740991,
-            "maximum": 9007199254740991
+            "maximum": 9007199254740991,
+            "description": "ID of the open position to set exit rules on (from get_positions)"
           },
           "stop_loss": {
             "description": "Price at which to sell (stop-loss). E.g. 0.30 means sell if price drops to $0.30",
@@ -493,6 +559,9 @@
         "required": [
           "trade_id"
         ]
+      },
+      "annotations": {
+        "readOnlyHint": false
       }
     },
     {
@@ -502,6 +571,9 @@
         "$schema": "http://json-schema.org/draft-07/schema#",
         "type": "object",
         "properties": {}
+      },
+      "annotations": {
+        "readOnlyHint": true
       }
     },
     {
@@ -512,7 +584,8 @@
         "type": "object",
         "properties": {
           "address": {
-            "type": "string"
+            "type": "string",
+            "description": "Ethereum wallet address of the trader to backtest"
           },
           "copy_budget": {
             "default": 5,
@@ -525,6 +598,9 @@
         "required": [
           "address"
         ]
+      },
+      "annotations": {
+        "readOnlyHint": true
       }
     },
     {
@@ -542,6 +618,9 @@
         "required": [
           "address"
         ]
+      },
+      "annotations": {
+        "readOnlyHint": true
       }
     },
     {
@@ -570,6 +649,9 @@
         "required": [
           "token_id"
         ]
+      },
+      "annotations": {
+        "readOnlyHint": true
       }
     },
     {
@@ -601,6 +683,9 @@
             "maximum": 20
           }
         }
+      },
+      "annotations": {
+        "readOnlyHint": true
       }
     },
     {
@@ -630,6 +715,9 @@
         "required": [
           "token_id"
         ]
+      },
+      "annotations": {
+        "readOnlyHint": true
       }
     },
     {
@@ -641,6 +729,7 @@
         "properties": {
           "action": {
             "default": "list",
+            "description": "Action to perform: add, remove, or list watched markets",
             "type": "string",
             "enum": [
               "add",
@@ -649,9 +738,11 @@
             ]
           },
           "condition_id": {
+            "description": "Market condition ID to add or remove from watchlist",
             "type": "string"
           },
           "title": {
+            "description": "Friendly name for the market (shown in watchlist)",
             "type": "string"
           },
           "alert_below": {
@@ -667,6 +758,9 @@
             "maximum": 1
           }
         }
+      },
+      "annotations": {
+        "readOnlyHint": false
       }
     },
     {
@@ -696,6 +790,9 @@
             "type": "boolean"
           }
         }
+      },
+      "annotations": {
+        "readOnlyHint": false
       }
     },
     {
@@ -734,6 +831,9 @@
           "condition_id",
           "amount"
         ]
+      },
+      "annotations": {
+        "readOnlyHint": false
       }
     },
     {
@@ -760,6 +860,9 @@
             "maximum": 0.99
           }
         }
+      },
+      "annotations": {
+        "destructiveHint": true
       }
     },
     {
@@ -769,6 +872,9 @@
         "$schema": "http://json-schema.org/draft-07/schema#",
         "type": "object",
         "properties": {}
+      },
+      "annotations": {
+        "readOnlyHint": true
       }
     },
     {
@@ -799,6 +905,9 @@
         "required": [
           "query"
         ]
+      },
+      "annotations": {
+        "readOnlyHint": true
       }
     },
     {
@@ -823,6 +932,9 @@
             "maximum": 0.5
           }
         }
+      },
+      "annotations": {
+        "readOnlyHint": true
       }
     },
     {
@@ -842,11 +954,15 @@
           },
           "limit": {
             "default": 10,
+            "description": "Maximum number of related markets to return",
             "type": "integer",
             "minimum": 1,
             "maximum": 30
           }
         }
+      },
+      "annotations": {
+        "readOnlyHint": true
       }
     },
     {
@@ -871,6 +987,9 @@
         "required": [
           "condition_id"
         ]
+      },
+      "annotations": {
+        "readOnlyHint": true
       }
     },
     {
@@ -902,6 +1021,9 @@
             "maximum": 50
           }
         }
+      },
+      "annotations": {
+        "readOnlyHint": true
       }
     },
     {
@@ -919,6 +1041,9 @@
         "required": [
           "condition_id"
         ]
+      },
+      "annotations": {
+        "readOnlyHint": true
       }
     },
     {
@@ -928,6 +1053,9 @@
         "$schema": "http://json-schema.org/draft-07/schema#",
         "type": "object",
         "properties": {}
+      },
+      "annotations": {
+        "readOnlyHint": true
       }
     },
     {
@@ -980,6 +1108,9 @@
         "required": [
           "orders"
         ]
+      },
+      "annotations": {
+        "readOnlyHint": false
       }
     },
     {
@@ -1021,6 +1152,9 @@
             "type": "boolean"
           }
         }
+      },
+      "annotations": {
+        "readOnlyHint": false
       }
     },
     {
@@ -1030,6 +1164,9 @@
         "$schema": "http://json-schema.org/draft-07/schema#",
         "type": "object",
         "properties": {}
+      },
+      "annotations": {
+        "readOnlyHint": true
       }
     },
     {
@@ -1047,6 +1184,9 @@
         "required": [
           "order_id"
         ]
+      },
+      "annotations": {
+        "readOnlyHint": true
       }
     },
     {
@@ -1066,11 +1206,15 @@
           },
           "limit": {
             "default": 10,
+            "description": "Maximum number of events to return",
             "type": "integer",
             "minimum": 1,
             "maximum": 30
           }
         }
+      },
+      "annotations": {
+        "readOnlyHint": true
       }
     },
     {
@@ -1093,6 +1237,9 @@
         "required": [
           "condition_ids"
         ]
+      },
+      "annotations": {
+        "readOnlyHint": true
       }
     },
     {
@@ -1122,6 +1269,9 @@
             "maximum": 30
           }
         }
+      },
+      "annotations": {
+        "readOnlyHint": true
       }
     },
     {
@@ -1142,6 +1292,9 @@
             ]
           }
         }
+      },
+      "annotations": {
+        "readOnlyHint": true
       }
     },
     {
@@ -1166,7 +1319,12 @@
             "type": "string"
           }
         }
+      },
+      "annotations": {
+        "readOnlyHint": false
       }
     }
-  ]
+  ],
+  "prompts": [],
+  "resources": []
 }
