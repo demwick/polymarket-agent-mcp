@@ -3,6 +3,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import { createServer } from "http";
+import { readFileSync } from "fs";
 import Database from "better-sqlite3";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -459,6 +460,19 @@ async function startHttpServer() {
 
   const httpServer = createServer(async (req, res) => {
     const url = new URL(req.url || "/", `http://${req.headers.host}`);
+
+    // Server card for Smithery discovery
+    if (url.pathname === "/.well-known/mcp/server-card.json") {
+      try {
+        const card = readFileSync(path.join(__dirname, "..", ".well-known", "mcp", "server-card.json"), "utf-8");
+        res.writeHead(200, { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" });
+        res.end(card);
+      } catch {
+        res.writeHead(404);
+        res.end("Not Found");
+      }
+      return;
+    }
 
     // Health check
     if (url.pathname === "/health") {

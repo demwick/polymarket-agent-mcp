@@ -12,6 +12,7 @@ COPY package.json package-lock.json ./
 RUN npm ci --omit=dev
 COPY --from=builder /app/dist/ dist/
 COPY .env.example .env.example
+COPY .well-known/ .well-known/
 
 ENV NODE_ENV=production
 ENV COPY_MODE=preview
