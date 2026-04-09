@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { z } from "zod";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
@@ -91,6 +92,48 @@ const server = new McpServer({
   name: "polymarket-trader-mcp",
   version: pkg.version,
 });
+
+// MCP Prompts
+server.prompt(
+  "daily-trading-cycle",
+  "Run a complete daily trading cycle: check portfolio, scan smart money, discover opportunities, and manage positions",
+  () => ({
+    messages: [{
+      role: "user" as const,
+      content: {
+        type: "text" as const,
+        text: `Run my daily Polymarket trading cycle:
+1. Call get_dashboard for current status
+2. Call get_portfolio to review open positions
+3. Call check_exits to handle stop-loss/take-profit triggers
+4. Call discover_flow to scan smart money convergence signals
+5. Call trending_markets to find high-volume opportunities
+6. Call assess_risk to check portfolio health
+7. Summarize findings and suggest next actions`
+      }
+    }]
+  })
+);
+
+server.prompt(
+  "evaluate-trader",
+  "Deep evaluation of a trader before adding to watchlist",
+  { address: z.string().describe("Ethereum wallet address of the trader to evaluate") },
+  (input) => ({
+    messages: [{
+      role: "user" as const,
+      content: {
+        type: "text" as const,
+        text: `Evaluate trader ${input.address} for copy trading:
+1. Call analyze_trader with this address for profile and stats
+2. Call score_trader to get conviction score across 5 dimensions
+3. Call get_trader_positions to see their current positions
+4. Call backtest_trader to simulate historical performance
+5. Based on all data, recommend whether to add this trader to the watchlist`
+      }
+    }]
+  })
+);
 
 server.tool(
   "discover_traders",

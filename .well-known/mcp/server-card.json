@@ -6,6 +6,48 @@
   "description": "Trade, analyze, and automate Polymarket prediction markets via AI. 48 tools for direct trading, smart money flow detection, copy trading, backtesting, and portfolio management.",
   "homepage": "https://github.com/demwick/polymarket-trader-mcp",
   "icon": "https://raw.githubusercontent.com/demwick/polymarket-trader-mcp/main/assets/icon.svg",
+  "configSchema": {
+    "type": "object",
+    "properties": {
+      "COPY_MODE": {
+        "type": "string",
+        "enum": ["preview", "live"],
+        "default": "preview",
+        "description": "Trading mode: preview (simulated) or live (real orders on Polymarket)"
+      },
+      "DAILY_BUDGET": {
+        "type": "string",
+        "default": "20",
+        "description": "Maximum daily spending limit in USDC"
+      },
+      "MIN_CONVICTION": {
+        "type": "string",
+        "default": "3",
+        "description": "Minimum trade size in USDC to copy from watched traders"
+      },
+      "POLY_API_KEY": {
+        "type": "string",
+        "description": "Polymarket CLOB API key (required for live mode)"
+      },
+      "POLY_API_SECRET": {
+        "type": "string",
+        "description": "Polymarket CLOB API secret (required for live mode)"
+      },
+      "POLY_API_PASSPHRASE": {
+        "type": "string",
+        "description": "Polymarket CLOB API passphrase (required for live mode)"
+      },
+      "POLY_PRIVATE_KEY": {
+        "type": "string",
+        "description": "Polymarket wallet private key (required for live mode)"
+      },
+      "MCP_LICENSE_KEY": {
+        "type": "string",
+        "description": "MCP Marketplace license key for Pro features"
+      }
+    },
+    "required": []
+  },
   "tools": [
     {
       "name": "discover_traders",
@@ -1325,6 +1367,22 @@
       }
     }
   ],
-  "prompts": [],
+  "prompts": [
+    {
+      "name": "daily-trading-cycle",
+      "description": "Run a complete daily trading cycle: check portfolio, scan smart money, discover opportunities, and manage positions"
+    },
+    {
+      "name": "evaluate-trader",
+      "description": "Deep evaluation of a trader before adding to watchlist",
+      "arguments": [
+        {
+          "name": "address",
+          "description": "Ethereum wallet address of the trader to evaluate",
+          "required": true
+        }
+      ]
+    }
+  ],
   "resources": []
 }
