@@ -15,7 +15,7 @@ const pkg = require("../package.json");
 
 import { initializeDb } from "./db/schema.js";
 import { getConfig, hasLiveCredentials, validateLiveCredentials } from "./utils/config.js";
-import { log } from "./utils/logger.js";
+import { log, setMcpServer } from "./utils/logger.js";
 import { safe } from "./utils/tool-wrapper.js";
 
 import { BudgetManager } from "./services/budget-manager.js";
@@ -92,6 +92,7 @@ const server = new McpServer({
   name: "polymarket-trader-mcp",
   version: pkg.version,
 });
+setMcpServer(server);
 
 // MCP Prompts
 server.prompt(
