@@ -5,6 +5,13 @@ import { recordTrade, recordTradeWithBudget } from "../db/queries.js";
 import { getConfig, hasLiveCredentials } from "../utils/config.js";
 import { log } from "../utils/logger.js";
 
+/** Redact private keys and hex secrets from error messages to prevent leaks in logs. */
+function sanitizeError(msg: string): string {
+  // Remove anything that looks like a private key or hex secret (32+ hex chars)
+  return msg.replace(/0x[a-fA-F0-9]{32,}/g, "0x[REDACTED]")
+            .replace(/[a-fA-F0-9]{64,}/g, "[REDACTED]");
+}
+
 export interface TradeOrder {
   traderAddress: string;
   marketSlug: string | null;
@@ -122,7 +129,8 @@ export class TradeExecutor {
 
       return { tradeId, mode: "live", status: "executed", message: `Executed: ${order.orderSide ?? "BUY"} $${order.amount} @ ${order.price}` };
     } catch (err: any) {
-      const message = err?.message ?? String(err);
+      const rawMessage = err?.message ?? String(err);
+      const message = sanitizeError(rawMessage);
       log("error", `[LIVE] Failed ${order.orderSide ?? "BUY"} on ${order.marketSlug}: ${message}`);
       return this.recordFailedTrade(order, message);
     }
