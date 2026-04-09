@@ -20,6 +20,10 @@ jobs:
           registry-url: https://registry.npmjs.org
 
       - run: npm ci
+
+      - name: Type check
+        run: npx tsc --noEmit
+
       - run: npm run build
       - run: npm test
 
