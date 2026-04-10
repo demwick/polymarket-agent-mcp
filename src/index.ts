@@ -570,9 +570,6 @@ async function main() {
 async function startHttpServer() {
   const port = parseInt(process.env.PORT || "3000", 10);
 
-  const httpTransport = new StreamableHTTPServerTransport({ sessionIdGenerator: undefined });
-  await server.connect(httpTransport);
-
   const httpServer = createServer(async (req, res) => {
     const url = new URL(req.url || "/", `http://${req.headers.host}`);
 
@@ -614,14 +611,45 @@ async function startHttpServer() {
           return;
         }
       }
+      // Normalize Accept header for clients that omit either required MIME
+      // type. StreamableHTTPServerTransport does a literal substring check
+      // for both "application/json" and "text/event-stream"; some proxies
+      // (e.g. Smithery Connect) send only one of these, or "*/*", and the
+      // transport rejects with 406/500. @hono/node-server reads rawHeaders,
+      // so both req.headers and req.rawHeaders must be updated.
+      const accept = req.headers.accept || "";
+      if (!accept.includes("application/json") || !accept.includes("text/event-stream")) {
+        const normalized = "application/json, text/event-stream";
+        req.headers.accept = normalized;
+        const raw = req.rawHeaders;
+        let found = false;
+        for (let i = 0; i < raw.length; i += 2) {
+          if (raw[i].toLowerCase() === "accept") {
+            raw[i + 1] = normalized;
+            found = true;
+          }
+        }
+        if (!found) {
+          raw.push("Accept", normalized);
+        }
+      }
+      // Create a fresh transport per request. In stateless mode
+      // (sessionIdGenerator: undefined) the SDK's web-standard transport
+      // keeps per-request state that breaks reuse across multiple requests,
+      // so we instantiate a new transport and connect the MCP server to it
+      // for every incoming request.
+      const requestTransport = new StreamableHTTPServerTransport({ sessionIdGenerator: undefined });
       try {
-        await httpTransport.handleRequest(req, res);
+        await server.connect(requestTransport);
+        await requestTransport.handleRequest(req, res);
       } catch (err) {
         log("error", `MCP request error: ${err}`);
         if (!res.headersSent) {
           res.writeHead(500, { "Content-Type": "application/json" });
           res.end(JSON.stringify({ error: "Internal server error" }));
         }
+      } finally {
+        await requestTransport.close().catch(() => {});
       }
       return;
     }
