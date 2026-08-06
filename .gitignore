@@ -4,7 +4,11 @@ dist/
 *.db
 *.db-shm
 *.db-wal
+*.db.bak*
 .firecrawl/
 .DS_Store
 docs/superpowers/
 coverage/
+.claude/
+.playwright-mcp/
+.smithery/
