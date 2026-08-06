@@ -1,6 +1,6 @@
 {
   "name": "polymarket-agent-mcp",
-  "version": "1.6.7",
+  "version": "1.7.0",
   "mcpName": "io.github.demwick/polymarket-agent-mcp",
   "description": "MCP server for Polymarket — trade, analyze markets, copy top traders, and manage your portfolio via AI",
   "main": "dist/index.js",

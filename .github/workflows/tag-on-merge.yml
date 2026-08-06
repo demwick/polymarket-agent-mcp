@@ -65,13 +65,22 @@ jobs:
             "${TARBALL}"
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@153bb8e04406b158c6c84fc1615b65b24149a1fe # v2.6.1
+        uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda # v3.0.0
         with:
           tag_name: v${{ steps.tag.outputs.version }}
           generate_release_notes: true
           files: |
             ${{ steps.pack.outputs.tarball }}
             ${{ steps.pack.outputs.tarball }}.bundle
+
+      - name: Install mcp-publisher
+        run: |
+          curl -L "https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher_$(uname -s | tr '[:upper:]' '[:lower:]')_$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/').tar.gz" | tar xz mcp-publisher
+
+      - name: Publish to MCP Registry
+        run: |
+          ./mcp-publisher login github-oidc
+          ./mcp-publisher publish
 
       - name: Summary
         env:
@@ -82,4 +91,5 @@ jobs:
             echo "- Tagged v${VERSION}"
             echo "- Published to npm"
             echo "- GitHub Release created"
+            echo "- Published to MCP Registry"
           } >> $GITHUB_STEP_SUMMARY

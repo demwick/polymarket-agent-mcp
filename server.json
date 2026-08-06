@@ -6,13 +6,13 @@
     "url": "https://github.com/demwick/polymarket-agent-mcp",
     "source": "github"
   },
-  "version": "1.6.6",
+  "version": "1.7.0",
   "websiteUrl": "https://github.com/demwick/polymarket-agent-mcp#readme",
   "packages": [
     {
       "registryType": "npm",
       "identifier": "polymarket-agent-mcp",
-      "version": "1.6.6",
+      "version": "1.7.0",
       "transport": {
         "type": "stdio"
       },
