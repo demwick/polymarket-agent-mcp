@@ -27,7 +27,6 @@ const configSchema = z.object({
   MIN_CONVICTION: z.coerce.number().positive().default(3),
   COPY_MODE: z.enum(["preview", "live"]).default("preview"),
   CHAIN_ID: z.coerce.number().int().positive().default(137),
-  MCP_LICENSE_KEY: z.string().optional().default(""),
   MCP_API_KEY: z.string().optional().default(""),
   DB_PATH: z.string().optional().default(""),
   PORT: z.coerce.number().int().positive().optional(),
@@ -48,7 +47,6 @@ const SIGNING_KEY_FIELD = LIVE_CREDENTIAL_KEYS.find((k) => /PRIVATE/.test(k))!;
 const OPTIONAL_KEYS = (Object.keys(configSchema.shape) as (keyof Config)[]).filter(
   (k) => /^MCP_/.test(k),
 );
-const LICENSE_KEY_FIELD = OPTIONAL_KEYS.find((k) => /LICENSE/.test(k))!;
 const HTTP_AUTH_FIELD = OPTIONAL_KEYS.find((k) => /API_KEY$/.test(k))!;
 
 let _config: Config | null = null;
@@ -75,10 +73,6 @@ export function validateLiveCredentials(): string[] {
 // logged, persisted, or transmitted except inside a signed order body.
 export function getSigningKey(): string {
   return getConfig()[SIGNING_KEY_FIELD] as string;
-}
-
-export function hasLicenseKey(): boolean {
-  return !!getConfig()[LICENSE_KEY_FIELD];
 }
 
 export function getHttpAuthToken(): string {
