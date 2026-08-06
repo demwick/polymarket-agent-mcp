@@ -1,12 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { handleAnalyzeTrader } from "../../src/tools/analyze-trader.js";
 
-vi.mock("../../src/utils/license.js", () => ({
-  checkLicense: vi.fn().mockResolvedValue(false),
-  requirePro: vi.fn((name: string) => `${name} requires Pro`),
-  resetLicenseCache: vi.fn(),
-}));
-
 vi.mock("../../src/services/trader-analyzer.js", () => ({
   analyzeTrader: vi.fn().mockResolvedValue({
     address: "0xtestaddr",
@@ -18,16 +12,10 @@ vi.mock("../../src/services/trader-analyzer.js", () => ({
   }),
 }));
 
-import { checkLicense } from "../../src/utils/license.js";
 import { analyzeTrader } from "../../src/services/trader-analyzer.js";
-const mockCheckLicense = vi.mocked(checkLicense);
 const mockAnalyze = vi.mocked(analyzeTrader);
 
 describe("handleAnalyzeTrader", () => {
-  beforeEach(() => {
-    mockCheckLicense.mockResolvedValue(false);
-  });
-
   it("renders trader analysis with basic stats", async () => {
     const result = await handleAnalyzeTrader({ address: "0xtestaddr" });
     expect(result).toContain("Trader Analysis");
@@ -37,13 +25,7 @@ describe("handleAnalyzeTrader", () => {
     expect(result).toContain("$125.50");
   });
 
-  it("shows upgrade message for free tier", async () => {
-    const result = await handleAnalyzeTrader({ address: "0xtestaddr" });
-    expect(result).toContain("Upgrade to Pro");
-  });
-
-  it("shows recent trades for Pro tier", async () => {
-    mockCheckLicense.mockResolvedValue(true);
+  it("shows recent trades when the profile has them", async () => {
     mockAnalyze.mockResolvedValue({
       address: "0xtestaddr",
       activePositions: 3,

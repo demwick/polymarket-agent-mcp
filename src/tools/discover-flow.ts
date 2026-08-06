@@ -1,6 +1,5 @@
 import { z } from "zod";
 import { discoverSmartFlow } from "../services/smart-flow.js";
-import { checkLicense, requirePro } from "../utils/license.js";
 
 export const discoverFlowSchema = z.object({
   top_traders: z.number().int().min(5).max(100).optional().default(30).describe("Number of top traders to scan"),
@@ -9,8 +8,6 @@ export const discoverFlowSchema = z.object({
 });
 
 export async function handleDiscoverFlow(input: z.infer<typeof discoverFlowSchema>): Promise<string> {
-  const isPro = await checkLicense();
-  if (!isPro) return requirePro("discover_flow");
 
   const signals = await discoverSmartFlow({
     topN: input.top_traders,

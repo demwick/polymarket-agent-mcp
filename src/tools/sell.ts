@@ -2,7 +2,6 @@ import { z } from "zod";
 import Database from "better-sqlite3";
 import { TradeExecutor } from "../services/trade-executor.js";
 import { getOpenPositions } from "../db/queries.js";
-import { checkLicense, requirePro } from "../utils/license.js";
 import { log } from "../utils/logger.js";
 
 export const sellSchema = z.object({
@@ -12,11 +11,6 @@ export const sellSchema = z.object({
 });
 
 export async function handleSell(db: Database.Database, executor: TradeExecutor, input: z.infer<typeof sellSchema>): Promise<string> {
-  if (executor.getMode() === "live") {
-    const isPro = await checkLicense();
-    if (!isPro) return requirePro("sell (live mode)");
-  }
-
   if (!input.trade_id && !input.condition_id) {
     return "Provide either `trade_id` or `condition_id` to sell a position. Use `get_positions` to see your open positions.";
   }

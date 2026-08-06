@@ -4,12 +4,6 @@ import { initializeDb } from "../../src/db/schema.js";
 import { handleRebalance } from "../../src/tools/rebalance.js";
 import { addToWatchlist, getWatchlist } from "../../src/db/queries.js";
 
-vi.mock("../../src/utils/license.js", () => ({
-  checkLicense: vi.fn().mockResolvedValue(true),
-  requirePro: vi.fn((name: string) => `${name} requires Pro`),
-  resetLicenseCache: vi.fn(),
-}));
-
 vi.mock("../../src/utils/fetch.js", () => ({
   fetchWithRetry: vi.fn(async (url: string) => globalThis.fetch(url)),
 }));

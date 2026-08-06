@@ -5,21 +5,13 @@ import { recordTrade, getTradeHistory } from "../../src/db/queries.js";
 import { makeTestDb } from "../helpers/fixtures.js";
 import type { WtaMarket } from "../../src/services/wta-discovery.js";
 
-vi.mock("../../src/utils/license.js", () => ({
-  checkLicense: vi.fn().mockResolvedValue(true),
-  requirePro: vi.fn((name: string) => `${name} requires Pro`),
-  resetLicenseCache: vi.fn(),
-}));
-
 vi.mock("../../src/services/wta-discovery.js", () => ({
   discoverWtaMarkets: vi.fn(),
 }));
 
 import { handlePlaceStinkBid } from "../../src/tools/place-stink-bid.js";
-import { checkLicense } from "../../src/utils/license.js";
 import { discoverWtaMarkets } from "../../src/services/wta-discovery.js";
 
-const mockLicense = vi.mocked(checkLicense);
 const mockDiscover = vi.mocked(discoverWtaMarkets);
 
 function fakeWtaMarket(overrides: Partial<WtaMarket> = {}): WtaMarket {
@@ -48,15 +40,9 @@ describe("handlePlaceStinkBid", () => {
   beforeEach(() => {
     db = makeTestDb();
     executor = new TradeExecutor(db, "preview");
-    mockLicense.mockResolvedValue(true);
     mockDiscover.mockReset();
   });
 
-  it("requires Pro license", async () => {
-    mockLicense.mockResolvedValue(false);
-    const result = await handlePlaceStinkBid(db, executor, { discount_pct: 30, bet_size: 5 });
-    expect(result).toContain("Pro");
-  });
 
   it("returns message when no markets found", async () => {
     mockDiscover.mockResolvedValue([]);

@@ -43,10 +43,6 @@
       "POLY_PRIVATE_KEY": {
         "type": "string",
         "description": "Polymarket wallet private key (required for live mode)"
-      },
-      "MCP_LICENSE_KEY": {
-        "type": "string",
-        "description": "MCP Marketplace license key for Pro features"
       }
     },
     "required": []
@@ -144,7 +140,7 @@
     },
     {
       "name": "monitor.start",
-      "description": "Start a background loop that polls watched wallets for new trades and automatically copies them. Runs continuously at the specified interval until stop_monitor is called. Requires at least one wallet on the watchlist. Pro feature.",
+      "description": "Start a background loop that polls watched wallets for new trades and automatically copies them. Runs continuously at the specified interval until stop_monitor is called. Requires at least one wallet on the watchlist.",
       "inputSchema": {
         "$schema": "http://json-schema.org/draft-07/schema#",
         "type": "object",
@@ -164,7 +160,7 @@
     },
     {
       "name": "monitor.stop",
-      "description": "Stop the background wallet monitoring loop started by monitor.start. Call this to end a copy-trading session, before changing bot configuration via config.set or config.safety_limits, or when switching between preview and live modes via config.go_live. Does NOT close open positions — use positions.close or positions.set_exit_rules separately to unwind trades. Idempotent: safe to call when the monitor is not running. Returns a short confirmation string. No parameters. Pro feature.",
+      "description": "Stop the background wallet monitoring loop started by monitor.start. Call this to end a copy-trading session, before changing bot configuration via config.set or config.safety_limits, or when switching between preview and live modes via config.go_live. Does NOT close open positions — use positions.close or positions.set_exit_rules separately to unwind trades. Idempotent: safe to call when the monitor is not running. Returns a short confirmation string. No parameters.",
       "inputSchema": {
         "$schema": "http://json-schema.org/draft-07/schema#",
         "type": "object",
@@ -188,7 +184,7 @@
     },
     {
       "name": "trades.history",
-      "description": "Retrieve past copy trades from the database with optional filters by trader address or status. Returns trade details including entry price, P&L, and market info. Pro feature.",
+      "description": "Retrieve past copy trades from the database with optional filters by trader address or status. Returns trade details including entry price, P&L, and market info.",
       "inputSchema": {
         "$schema": "http://json-schema.org/draft-07/schema#",
         "type": "object",
@@ -216,7 +212,7 @@
     },
     {
       "name": "config.set",
-      "description": "Update bot configuration at runtime. Supports daily_budget (max USDC per day) and min_conviction (minimum trade size to copy). Changes take effect immediately and persist across restarts. Pro feature.",
+      "description": "Update bot configuration at runtime. Supports daily_budget (max USDC per day) and min_conviction (minimum trade size to copy). Changes take effect immediately and persist across restarts.",
       "inputSchema": {
         "$schema": "http://json-schema.org/draft-07/schema#",
         "type": "object",
@@ -245,7 +241,7 @@
     },
     {
       "name": "config.go_live",
-      "description": "Switch from preview (simulated) to live trading mode where real orders are placed on Polymarket. Requires the four Polymarket CLOB credentials (documented in PERMISSIONS.md) to be present in the environment. This action uses real money. Pro feature.",
+      "description": "Switch from preview (simulated) to live trading mode where real orders are placed on Polymarket. Requires the four Polymarket CLOB credentials (documented in PERMISSIONS.md) to be present in the environment. This action uses real money.",
       "inputSchema": {
         "$schema": "http://json-schema.org/draft-07/schema#",
         "type": "object",
@@ -286,7 +282,7 @@
     },
     {
       "name": "traders.positions",
-      "description": "View another trader's current open positions on Polymarket by their wallet address. Shows market name, outcome, size, and current price. Useful for due diligence before copy trading. Pro feature.",
+      "description": "View another trader's current open positions on Polymarket by their wallet address. Shows market name, outcome, size, and current price. Useful for due diligence before copy trading.",
       "inputSchema": {
         "$schema": "http://json-schema.org/draft-07/schema#",
         "type": "object",
@@ -337,7 +333,7 @@
     },
     {
       "name": "positions.close",
-      "description": "Manually close a copy trading position by trade ID. In live mode, places a sell order on Polymarket. In preview mode, marks the position as closed in the database. Use get_positions to find the trade_id. Pro feature.",
+      "description": "Manually close a copy trading position by trade ID. In live mode, places a sell order on Polymarket. In preview mode, marks the position as closed in the database. Use get_positions to find the trade_id.",
       "inputSchema": {
         "$schema": "http://json-schema.org/draft-07/schema#",
         "type": "object",
@@ -425,7 +421,7 @@
     },
     {
       "name": "wta.discover",
-      "description": "Find today's WTA tennis match markets on Polymarket where the favorite is available at a discount. Returns matches with current price vs fair price and the discount percentage. Use place_stink_bid to act on these opportunities. Pro feature.",
+      "description": "Find today's WTA tennis match markets on Polymarket where the favorite is available at a discount. Returns matches with current price vs fair price and the discount percentage. Use place_stink_bid to act on these opportunities.",
       "inputSchema": {
         "$schema": "http://json-schema.org/draft-07/schema#",
         "type": "object",
@@ -445,7 +441,7 @@
     },
     {
       "name": "wta.bid",
-      "description": "Place limit orders (stink bids) at a discount on WTA tennis match favorites. Orders sit in the order book until filled at your target price. In preview mode, simulates the orders. In live mode, places real CLOB orders. Pro feature.",
+      "description": "Place limit orders (stink bids) at a discount on WTA tennis match favorites. Orders sit in the order book until filled at your target price. In preview mode, simulates the orders. In live mode, places real CLOB orders.",
       "inputSchema": {
         "$schema": "http://json-schema.org/draft-07/schema#",
         "type": "object",
@@ -472,7 +468,7 @@
     },
     {
       "name": "orders.cancel",
-      "description": "Cancel ALL open/pending limit orders on Polymarket for this account in a single call. Use as an emergency stop, before changing strategy, after a sudden price move, or when unwinding positions. Not reversible — cancelled orders must be re-placed via orders.buy, wta.bid, or orders.batch. Returns the count of cancelled orders. Call orders.list first if you want to preview what will be cancelled. Only works in live mode (no-op in preview). No parameters. Pro feature.",
+      "description": "Cancel ALL open/pending limit orders on Polymarket for this account in a single call. Use as an emergency stop, before changing strategy, after a sudden price move, or when unwinding positions. Not reversible — cancelled orders must be re-placed via orders.buy, wta.bid, or orders.batch. Returns the count of cancelled orders. Call orders.list first if you want to preview what will be cancelled. Only works in live mode (no-op in preview). No parameters.",
       "inputSchema": {
         "$schema": "http://json-schema.org/draft-07/schema#",
         "type": "object",
@@ -579,7 +575,7 @@
     },
     {
       "name": "positions.set_exit_rules",
-      "description": "Set stop-loss and/or take-profit price levels on an open position. When the market price crosses these levels, check_exits will automatically close the position. Use get_positions to find trade IDs. Pro feature.",
+      "description": "Set stop-loss and/or take-profit price levels on an open position. When the market price crosses these levels, check_exits will automatically close the position. Use get_positions to find trade IDs.",
       "inputSchema": {
         "$schema": "http://json-schema.org/draft-07/schema#",
         "type": "object",
@@ -625,7 +621,7 @@
     },
     {
       "name": "traders.backtest",
-      "description": "Simulate copying a trader's historical trades to calculate hypothetical P&L. Shows what you would have earned if you had copy-traded this wallet. Use before adding a trader to your watchlist to validate their performance. Pro feature.",
+      "description": "Simulate copying a trader's historical trades to calculate hypothetical P&L. Shows what you would have earned if you had copy-traded this wallet. Use before adding a trader to your watchlist to validate their performance.",
       "inputSchema": {
         "$schema": "http://json-schema.org/draft-07/schema#",
         "type": "object",
@@ -653,7 +649,7 @@
     },
     {
       "name": "traders.score",
-      "description": "Calculate a conviction score (0-100) for a trader across 5 dimensions: win rate, volume, consistency, experience, and diversity. Higher scores indicate more reliable traders for copy trading. Pro feature.",
+      "description": "Calculate a conviction score (0-100) for a trader across 5 dimensions: win rate, volume, consistency, experience, and diversity. Higher scores indicate more reliable traders for copy trading.",
       "inputSchema": {
         "$schema": "http://json-schema.org/draft-07/schema#",
         "type": "object",
@@ -674,7 +670,7 @@
     },
     {
       "name": "markets.check",
-      "description": "Evaluate market quality by checking bid/ask spread, order book depth, and price range. Returns a pass/fail with specific reasons. Use before placing trades to avoid illiquid or wide-spread markets. Pro feature.",
+      "description": "Evaluate market quality by checking bid/ask spread, order book depth, and price range. Returns a pass/fail with specific reasons. Use before placing trades to avoid illiquid or wide-spread markets.",
       "inputSchema": {
         "$schema": "http://json-schema.org/draft-07/schema#",
         "type": "object",
@@ -705,7 +701,7 @@
     },
     {
       "name": "flow.discover",
-      "description": "Scan top leaderboard traders for smart money convergence signals. Identifies markets where multiple top traders are buying the same outcome simultaneously, indicating strong conviction. Pro feature.",
+      "description": "Scan top leaderboard traders for smart money convergence signals. Identifies markets where multiple top traders are buying the same outcome simultaneously, indicating strong conviction.",
       "inputSchema": {
         "$schema": "http://json-schema.org/draft-07/schema#",
         "type": "object",
@@ -739,7 +735,7 @@
     },
     {
       "name": "markets.price_history",
-      "description": "Fetch historical OHLC price data for a market token over a configurable time window (1h to 1m). Returns price points with a sparkline visualization showing the price trend. Pro feature.",
+      "description": "Fetch historical OHLC price data for a market token over a configurable time window (1h to 1m). Returns price points with a sparkline visualization showing the price trend.",
       "inputSchema": {
         "$schema": "http://json-schema.org/draft-07/schema#",
         "type": "object",
@@ -814,7 +810,7 @@
     },
     {
       "name": "watchlist.rebalance",
-      "description": "Analyze all traders on your watchlist and remove underperformers whose conviction score or win rate falls below your threshold. Use to keep your watchlist focused on high-quality traders. Pro feature.",
+      "description": "Analyze all traders on your watchlist and remove underperformers whose conviction score or win rate falls below your threshold. Use to keep your watchlist focused on high-quality traders.",
       "inputSchema": {
         "$schema": "http://json-schema.org/draft-07/schema#",
         "type": "object",
@@ -1208,7 +1204,7 @@
     },
     {
       "name": "orders.list",
-      "description": "List all open (pending/unfilled) limit orders currently resting on Polymarket's order book for this account. Use after placing limit orders via orders.buy or wta.bid to confirm acceptance, or before orders.cancel to preview what will be removed. Returns each order's ID, market question, side (BUY/SELL), size, limit price, and age. For deeper detail on a single order, call orders.status with its order_id. Only works in live mode (returns an empty list in preview). No parameters. Pro feature.",
+      "description": "List all open (pending/unfilled) limit orders currently resting on Polymarket's order book for this account. Use after placing limit orders via orders.buy or wta.bid to confirm acceptance, or before orders.cancel to preview what will be removed. Returns each order's ID, market question, side (BUY/SELL), size, limit price, and age. For deeper detail on a single order, call orders.status with its order_id. Only works in live mode (returns an empty list in preview). No parameters.",
       "inputSchema": {
         "$schema": "http://json-schema.org/draft-07/schema#",
         "type": "object",
@@ -1447,13 +1443,6 @@
           "dataFlow": "inbound-only",
           "authentication": "none",
           "scope": "Public market price streams; no wallet or user identity transmitted"
-        },
-        {
-          "host": "mcp-marketplace.io",
-          "protocol": "https",
-          "purpose": "One-time license key verification at startup; cached after first call",
-          "sensitive": false,
-          "optional": true
         }
       ],
       "inbound": [
@@ -1514,7 +1503,7 @@
     "trustBoundary": "single-tenant local process; not designed for multi-user hosting",
     "secretsPolicy": "All secrets live exclusively in environment variables loaded at startup. None are written to disk, database, logs, stdout, or any outbound request except to their designated API endpoint over HTTPS.",
     "defaultMode": "preview (simulated trades) — requires explicit COPY_MODE=live and all four Polymarket CLOB credentials to place real orders",
-    "networkPolicy": "Only the five hosts listed in permissions.network.outbound are contacted. All HTTP requests use fetchWithRetry with a 10s timeout and bounded exponential backoff.",
+    "networkPolicy": "Only the four hosts listed in permissions.network.outbound are contacted. All HTTP requests use fetchWithRetry with a 10s timeout and bounded exponential backoff.",
     "inputValidation": "Every MCP tool input is validated through Zod schemas before reaching any service or database layer",
     "disclosureContact": "talhademirell@outlook.com",
     "disclosurePolicy": "SECURITY.md"

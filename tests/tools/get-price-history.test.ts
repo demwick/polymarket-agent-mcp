@@ -1,29 +1,14 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 
-vi.mock("../../src/utils/license.js", () => ({
-  checkLicense: vi.fn().mockResolvedValue(true),
-  requirePro: vi.fn((name: string) => `${name} requires Pro`),
-}));
-
 vi.mock("../../src/utils/fetch.js", () => ({
   fetchWithRetry: vi.fn(async (url: string) => globalThis.fetch(url)),
 }));
 
 import { handleGetPriceHistory } from "../../src/tools/get-price-history.js";
-import { checkLicense } from "../../src/utils/license.js";
 
 describe("handleGetPriceHistory", () => {
   afterEach(() => {
     vi.restoreAllMocks();
-    vi.mocked(checkLicense).mockResolvedValue(true);
-  });
-
-  it("gates behind Pro license", async () => {
-    vi.mocked(checkLicense).mockResolvedValueOnce(false);
-
-    const result = await handleGetPriceHistory({ token_id: "tok1", interval: "1d" });
-
-    expect(result).toContain("requires Pro");
   });
 
   it("renders price history table from CLOB API", async () => {

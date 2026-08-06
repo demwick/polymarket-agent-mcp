@@ -1,20 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
-vi.mock("../../src/utils/license.js", () => ({
-  checkLicense: vi.fn().mockResolvedValue(true),
-  requirePro: vi.fn((name: string) => `${name} requires Pro — upgrade message`),
-  resetLicenseCache: vi.fn(),
-}));
-
 vi.mock("../../src/services/conviction-scorer.js", () => ({
   scoreTrader: vi.fn(),
 }));
 
 import { handleScoreTrader } from "../../src/tools/score-trader.js";
-import { checkLicense } from "../../src/utils/license.js";
 import { scoreTrader } from "../../src/services/conviction-scorer.js";
 
-const mockLicense = vi.mocked(checkLicense);
 const mockScore = vi.mocked(scoreTrader);
 
 const VALID_ADDR = "0x1234567890abcdef1234567890abcdef12345678";
@@ -42,16 +34,9 @@ function makeScore(overrides: Partial<{
 
 describe("handleScoreTrader", () => {
   beforeEach(() => {
-    mockLicense.mockResolvedValue(true);
     mockScore.mockResolvedValue(makeScore());
   });
 
-  it("returns Pro upgrade message for free tier", async () => {
-    mockLicense.mockResolvedValue(false);
-    const result = await handleScoreTrader({ address: VALID_ADDR });
-    expect(result).toContain("Pro");
-    expect(mockScore).not.toHaveBeenCalled();
-  });
 
   it("renders conviction score header with truncated address", async () => {
     const result = await handleScoreTrader({ address: VALID_ADDR });

@@ -4,11 +4,6 @@ import { initializeDb } from "../../src/db/schema.js";
 import { handleListWatchlist } from "../../src/tools/list-watchlist.js";
 import { addToWatchlist } from "../../src/db/queries.js";
 
-vi.mock("../../src/utils/license.js", () => ({
-  checkLicense: vi.fn().mockResolvedValue(true),
-  requirePro: vi.fn((name: string) => `${name} requires Pro`),
-}));
-
 describe("handleListWatchlist", () => {
   let db: Database.Database;
 

@@ -1,21 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
-vi.mock("../../src/utils/license.js", () => ({
-  checkLicense: vi.fn().mockResolvedValue(true),
-  requirePro: vi.fn((name: string) => `${name} requires Pro`),
-  resetLicenseCache: vi.fn(),
-}));
-
 vi.mock("../../src/services/smart-flow.js", () => ({
   discoverSmartFlow: vi.fn(),
 }));
 
 import { handleDiscoverFlow } from "../../src/tools/discover-flow.js";
-import { checkLicense } from "../../src/utils/license.js";
 import { discoverSmartFlow } from "../../src/services/smart-flow.js";
 import type { FlowSignal } from "../../src/services/smart-flow.js";
 
-const mockLicense = vi.mocked(checkLicense);
 const mockDiscover = vi.mocked(discoverSmartFlow);
 
 function makeSignal(overrides: Partial<FlowSignal> = {}): FlowSignal {
@@ -37,16 +29,9 @@ function makeSignal(overrides: Partial<FlowSignal> = {}): FlowSignal {
 describe("handleDiscoverFlow", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockLicense.mockResolvedValue(true);
     mockDiscover.mockResolvedValue([makeSignal()]);
   });
 
-  it("requires Pro license", async () => {
-    mockLicense.mockResolvedValue(false);
-    const result = await handleDiscoverFlow({ top_traders: 30, max_age_minutes: 60, min_traders: 2 });
-    expect(result).toContain("requires Pro");
-    expect(mockDiscover).not.toHaveBeenCalled();
-  });
 
   it("forwards parameters to the service", async () => {
     await handleDiscoverFlow({ top_traders: 50, max_age_minutes: 120, min_traders: 3 });

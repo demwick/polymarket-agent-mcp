@@ -4,12 +4,6 @@ import { initializeDb } from "../../src/db/schema.js";
 import { handleSetExitRules } from "../../src/tools/set-exit-rules.js";
 import { recordTrade } from "../../src/db/queries.js";
 
-vi.mock("../../src/utils/license.js", () => ({
-  checkLicense: vi.fn().mockResolvedValue(true),
-  requirePro: vi.fn((name: string) => `${name} requires Pro`),
-  resetLicenseCache: vi.fn(),
-}));
-
 describe("handleSetExitRules", () => {
   let db: Database.Database;
 

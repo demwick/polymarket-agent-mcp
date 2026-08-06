@@ -5,15 +5,6 @@ import { handleSetConfig } from "../../src/tools/set-config.js";
 import { BudgetManager } from "../../src/services/budget-manager.js";
 import { getConfig } from "../../src/db/queries.js";
 
-vi.mock("../../src/utils/license.js", () => ({
-  checkLicense: vi.fn().mockResolvedValue(true),
-  requirePro: vi.fn((name: string) => `${name} requires Pro`),
-  resetLicenseCache: vi.fn(),
-}));
-
-import { checkLicense } from "../../src/utils/license.js";
-const mockCheckLicense = vi.mocked(checkLicense);
-
 describe("handleSetConfig", () => {
   let db: Database.Database;
   let bm: BudgetManager;
@@ -22,7 +13,6 @@ describe("handleSetConfig", () => {
     db = new Database(":memory:");
     initializeDb(db);
     bm = new BudgetManager(db, 20);
-    mockCheckLicense.mockResolvedValue(true);
   });
 
   it("updates daily budget and BudgetManager", async () => {
@@ -43,9 +33,4 @@ describe("handleSetConfig", () => {
     expect(getConfig(db, "min_conviction")).toBe("5");
   });
 
-  it("requires Pro license", async () => {
-    mockCheckLicense.mockResolvedValue(false);
-    const result = await handleSetConfig(db, bm, { key: "daily_budget", value: "50" });
-    expect(result).toContain("Pro");
-  });
 });

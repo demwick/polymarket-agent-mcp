@@ -1,7 +1,6 @@
 import { z } from "zod";
 import Database from "better-sqlite3";
 import { setExitRules } from "../db/queries.js";
-import { checkLicense, requirePro } from "../utils/license.js";
 
 export const setExitRulesSchema = z.object({
   trade_id: z.number().int().describe("ID of the open position to set exit rules on (from get_positions)"),
@@ -10,8 +9,6 @@ export const setExitRulesSchema = z.object({
 });
 
 export async function handleSetExitRules(db: Database.Database, input: z.infer<typeof setExitRulesSchema>): Promise<string> {
-  const isPro = await checkLicense();
-  if (!isPro) return requirePro("set_exit_rules");
 
   if (!input.stop_loss && !input.take_profit) {
     return "Provide at least one of `stop_loss` or `take_profit`. Values are market prices between 0 and 1.";

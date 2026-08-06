@@ -1,14 +1,11 @@
 import { z } from "zod";
 import { scoreTrader } from "../services/conviction-scorer.js";
-import { checkLicense, requirePro } from "../utils/license.js";
 
 export const scoreTraderSchema = z.object({
   address: z.string().regex(/^0x[a-fA-F0-9]{40}$/, "Must be a valid Ethereum address (0x + 40 hex chars)").describe("Trader's Ethereum wallet address (0x...) to score"),
 });
 
 export async function handleScoreTrader(input: z.infer<typeof scoreTraderSchema>): Promise<string> {
-  const isPro = await checkLicense();
-  if (!isPro) return requirePro("score_trader");
   const result = await scoreTrader(input.address);
 
   const bar = (val: number, max: number) => {

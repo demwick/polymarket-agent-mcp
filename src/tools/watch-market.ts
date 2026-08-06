@@ -2,7 +2,6 @@ import { z } from "zod";
 import Database from "better-sqlite3";
 import { addMarketWatch, removeMarketWatch, getMarketWatchlist } from "../db/queries.js";
 import { getMarketPriceByCondition } from "../services/price-service.js";
-import { checkLicense, requirePro } from "../utils/license.js";
 
 export const watchMarketSchema = z.object({
   action: z.enum(["add", "remove", "list"]).default("list").describe("Action to perform: add, remove, or list watched markets"),
@@ -13,8 +12,6 @@ export const watchMarketSchema = z.object({
 });
 
 export async function handleWatchMarket(db: Database.Database, input: z.infer<typeof watchMarketSchema>): Promise<string> {
-  const isPro = await checkLicense();
-  if (!isPro) return requirePro("watch_market");
 
   if (input.action === "list") {
     return renderWatchlist(db);

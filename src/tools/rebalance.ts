@@ -3,7 +3,6 @@ import Database from "better-sqlite3";
 import { getWatchlist, removeFromWatchlist } from "../db/queries.js";
 import { analyzeTrader } from "../services/trader-analyzer.js";
 import { scoreTrader } from "../services/conviction-scorer.js";
-import { checkLicense, requirePro } from "../utils/license.js";
 import { log } from "../utils/logger.js";
 
 export const rebalanceSchema = z.object({
@@ -22,8 +21,6 @@ interface RebalanceResult {
 }
 
 export async function handleRebalance(db: Database.Database, input: z.infer<typeof rebalanceSchema>): Promise<string> {
-  const isPro = await checkLicense();
-  if (!isPro) return requirePro("rebalance");
 
   const watchlist = getWatchlist(db);
   if (watchlist.length === 0) {

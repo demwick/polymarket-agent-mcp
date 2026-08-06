@@ -1,7 +1,6 @@
 import { z } from "zod";
 import Database from "better-sqlite3";
-import { addToWatchlist, removeFromWatchlist, getWatchlistCount } from "../db/queries.js";
-import { checkLicense, requirePro } from "../utils/license.js";
+import { addToWatchlist, removeFromWatchlist } from "../db/queries.js";
 
 export const watchWalletSchema = z.object({
   address: z.string().regex(/^0x[a-fA-F0-9]{40}$/, "Invalid Ethereum address").describe("Ethereum wallet address to watch (0x followed by 40 hex characters)"),
@@ -17,13 +16,6 @@ export async function handleWatchWallet(db: Database.Database, input: WatchWalle
     return `Removed ${input.address} from watchlist.`;
   }
 
-  const isPro = await checkLicense();
-  const currentCount = getWatchlistCount(db);
-
-  if (!isPro && currentCount >= 3) {
-    return `Free tier is limited to 3 wallets. You have ${currentCount}. ${requirePro("watch_wallet")}`;
-  }
-
   addToWatchlist(db, {
     address: input.address,
     alias: input.alias ?? null,
@@ -33,6 +25,5 @@ export async function handleWatchWallet(db: Database.Database, input: WatchWalle
     trade_count: 0,
   });
 
-  const limitInfo = isPro ? "" : ` (${currentCount + 1}/3 free slots used)`;
-  return `Added ${input.alias ?? input.address} to watchlist.${limitInfo}`;
+  return `Added ${input.alias ?? input.address} to watchlist.`;
 }

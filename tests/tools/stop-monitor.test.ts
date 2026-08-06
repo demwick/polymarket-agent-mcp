@@ -5,15 +5,6 @@ import { BudgetManager } from "../../src/services/budget-manager.js";
 import { WalletMonitor } from "../../src/services/wallet-monitor.js";
 import { makeTestDb, makePreviewExecutor } from "../helpers/fixtures.js";
 
-vi.mock("../../src/utils/license.js", () => ({
-  checkLicense: vi.fn().mockResolvedValue(true),
-  requirePro: vi.fn((name: string) => `${name} requires Pro`),
-  resetLicenseCache: vi.fn(),
-}));
-
-import { checkLicense } from "../../src/utils/license.js";
-const mockCheckLicense = vi.mocked(checkLicense);
-
 describe("handleStopMonitor (complementary)", () => {
   let db: Database.Database;
   let monitor: WalletMonitor;
@@ -23,7 +14,6 @@ describe("handleStopMonitor (complementary)", () => {
     const bm = new BudgetManager(db, 20);
     const executor = makePreviewExecutor(db);
     monitor = new WalletMonitor(db, bm, executor, 3);
-    mockCheckLicense.mockResolvedValue(true);
   });
 
   afterEach(() => {
@@ -50,19 +40,5 @@ describe("handleStopMonitor (complementary)", () => {
     expect(stopSpy).not.toHaveBeenCalled();
   });
 
-  it("does not call monitor.stop when Pro gate fails", async () => {
-    mockCheckLicense.mockResolvedValue(false);
-    const stopSpy = vi.spyOn(monitor, "stop").mockImplementation(() => {});
 
-    const result = await handleStopMonitor(monitor);
-
-    expect(result).toContain("Pro");
-    expect(stopSpy).not.toHaveBeenCalled();
-  });
-
-  it("invokes requirePro with stop_monitor identifier", async () => {
-    mockCheckLicense.mockResolvedValue(false);
-    const result = await handleStopMonitor(monitor);
-    expect(result).toContain("stop_monitor");
-  });
 });

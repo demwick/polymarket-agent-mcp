@@ -1,7 +1,6 @@
 import { z } from "zod";
 import Database from "better-sqlite3";
 import { getTradeHistory } from "../db/queries.js";
-import { checkLicense, requirePro } from "../utils/license.js";
 
 export const tradeHistorySchema = z.object({
   limit: z.number().int().min(1).max(100).optional().default(20).describe("Maximum number of trades to return"),
@@ -12,10 +11,6 @@ export const tradeHistorySchema = z.object({
 export type TradeHistoryInput = z.infer<typeof tradeHistorySchema>;
 
 export async function handleGetTradeHistory(db: Database.Database, input: TradeHistoryInput): Promise<string> {
-  const isPro = await checkLicense();
-  if (!isPro) {
-    return requirePro("get_trade_history");
-  }
 
   const trades = getTradeHistory(db, {
     limit: input.limit,

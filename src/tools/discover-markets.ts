@@ -1,7 +1,6 @@
 import { z } from "zod";
 import { log } from "../utils/logger.js";
 import { fetchWithRetry } from "../utils/fetch.js";
-import { checkLicense, requirePro } from "../utils/license.js";
 
 const GAMMA_API_BASE = "https://gamma-api.polymarket.com";
 
@@ -15,7 +14,6 @@ export const discoverMarketsSchema = z.object({
 export type DiscoverMarketsInput = z.infer<typeof discoverMarketsSchema>;
 
 export async function handleDiscoverMarkets(input: DiscoverMarketsInput): Promise<string> {
-  const isPro = await checkLicense(); if (!isPro) return requirePro("discover_markets");
   const now = new Date();
   let endBefore = "";
 

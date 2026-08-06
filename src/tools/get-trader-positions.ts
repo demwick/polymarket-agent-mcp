@@ -1,6 +1,5 @@
 import { z } from "zod";
 import { getTraderOpenPositions } from "../services/trader-analyzer.js";
-import { checkLicense, requirePro } from "../utils/license.js";
 
 export const getTraderPositionsSchema = z.object({
   address: z.string().regex(/^0x[a-fA-F0-9]{40}$/, "Must be a valid Ethereum address (0x + 40 hex chars)").describe("Trader's Ethereum wallet address (0x...)"),
@@ -8,8 +7,6 @@ export const getTraderPositionsSchema = z.object({
 });
 
 export async function handleGetTraderPositions(input: z.infer<typeof getTraderPositionsSchema>): Promise<string> {
-  const isPro = await checkLicense();
-  if (!isPro) return requirePro("get_trader_positions");
 
   const positions = await getTraderOpenPositions(input.address, input.limit);
 

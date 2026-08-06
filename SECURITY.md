@@ -52,7 +52,6 @@ Only five hosts are ever contacted:
 2. `gamma-api.polymarket.com` (HTTPS, read-only)
 3. `clob.polymarket.com` (HTTPS, reads + signed order writes in live mode)
 4. `ws-subscriptions-clob.polymarket.com` (WSS, inbound-only public price stream)
-5. `mcp-marketplace.io` (HTTPS, optional one-time license verification)
 
 There is no analytics, telemetry, crash reporting, or update-check traffic. The WebSocket connection is purely inbound — it subscribes to Polymarket's public price feed and receives updates; no wallet or credential is transmitted. See [PERMISSIONS.md](./PERMISSIONS.md) for the complete manifest.
 

@@ -3,16 +3,7 @@ import Database from "better-sqlite3";
 import { initializeDb } from "../../src/db/schema.js";
 import { TradeExecutor } from "../../src/services/trade-executor.js";
 
-vi.mock("../../src/utils/license.js", () => ({
-  checkLicense: vi.fn().mockResolvedValue(true),
-  requirePro: vi.fn((name: string) => `${name} requires Pro`),
-  resetLicenseCache: vi.fn(),
-}));
-
 import { handleCancelOrders } from "../../src/tools/cancel-orders.js";
-import { checkLicense } from "../../src/utils/license.js";
-
-const mockLicense = vi.mocked(checkLicense);
 
 describe("handleCancelOrders", () => {
   let db: Database.Database;
@@ -22,14 +13,8 @@ describe("handleCancelOrders", () => {
     db = new Database(":memory:");
     initializeDb(db);
     executor = new TradeExecutor(db, "preview");
-    mockLicense.mockResolvedValue(true);
   });
 
-  it("requires Pro license", async () => {
-    mockLicense.mockResolvedValue(false);
-    const result = await handleCancelOrders(executor);
-    expect(result).toContain("Pro");
-  });
 
   it("refuses to run in preview mode", async () => {
     // executor is preview by default
