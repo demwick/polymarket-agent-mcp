@@ -10,7 +10,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-blue)](https://www.typescriptlang.org)
 [![MCP SDK](https://img.shields.io/badge/MCP%20SDK-1.30-purple)](https://modelcontextprotocol.io)
 [![Tools](https://img.shields.io/badge/tools-48-blue)](#tool-overview)
-[![Tests](https://img.shields.io/badge/tests-435%20passing-brightgreen)](tests/)
+[![Tests](https://img.shields.io/badge/tests-475%20passing-brightgreen)](tests/)
 [![SafeSkill 97/100](https://img.shields.io/badge/SafeSkill-97%2F100_Verified%20Safe-brightgreen)](https://safeskill.dev/scan/demwick-polymarket-agent-mcp)
 [![Socket Badge](https://socket.dev/api/badge/npm/package/polymarket-agent-mcp)](https://socket.dev/npm/package/polymarket-agent-mcp)
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/demwick/polymarket-agent-mcp/badge)](https://securityscorecards.dev/viewer/?uri=github.com/demwick/polymarket-agent-mcp)
