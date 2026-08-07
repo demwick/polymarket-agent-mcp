@@ -9,12 +9,6 @@ import {
   seedPosition,
 } from "../helpers/fixtures.js";
 
-vi.mock("../../src/utils/license.js", () => ({
-  checkLicense: vi.fn().mockResolvedValue(true),
-  requirePro: vi.fn((name: string) => `${name} requires Pro`),
-  resetLicenseCache: vi.fn(),
-}));
-
 vi.mock("../../src/services/market-resolver.js", async () => {
   const actual = await vi.importActual<typeof import("../../src/services/market-resolver.js")>(
     "../../src/services/market-resolver.js"

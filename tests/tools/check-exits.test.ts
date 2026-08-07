@@ -2,21 +2,13 @@ import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
 import Database from "better-sqlite3";
 import { makeTestDb } from "../helpers/fixtures.js";
 
-vi.mock("../../src/utils/license.js", () => ({
-  checkLicense: vi.fn().mockResolvedValue(true),
-  requirePro: vi.fn((name: string) => `${name} requires Pro`),
-  resetLicenseCache: vi.fn(),
-}));
-
 vi.mock("../../src/services/position-tracker.js", () => ({
   PositionTracker: vi.fn(),
 }));
 
 import { handleCheckExits } from "../../src/tools/check-exits.js";
-import { checkLicense } from "../../src/utils/license.js";
 import { PositionTracker } from "../../src/services/position-tracker.js";
 
-const mockLicense = vi.mocked(checkLicense);
 const MockedTracker = vi.mocked(PositionTracker);
 
 describe("handleCheckExits", () => {
@@ -24,7 +16,6 @@ describe("handleCheckExits", () => {
 
   beforeEach(() => {
     db = makeTestDb();
-    mockLicense.mockResolvedValue(true);
     MockedTracker.mockReset();
   });
 
@@ -32,12 +23,6 @@ describe("handleCheckExits", () => {
     vi.restoreAllMocks();
   });
 
-  it("requires Pro license", async () => {
-    mockLicense.mockResolvedValue(false);
-    const result = await handleCheckExits(db);
-    expect(result).toContain("Pro");
-    expect(MockedTracker).not.toHaveBeenCalled();
-  });
 
   it("returns 'no positions resolved' when tracker reports zero", async () => {
     MockedTracker.mockImplementation(function (this: any) {

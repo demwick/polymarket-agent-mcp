@@ -1,4 +1,3 @@
-import { z } from "zod";
 import { TradeExecutor } from "../services/trade-executor.js";
 import { log } from "../utils/logger.js";
 

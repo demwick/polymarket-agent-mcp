@@ -1,20 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
-vi.mock("../../src/utils/license.js", () => ({
-  checkLicense: vi.fn().mockResolvedValue(true),
-  requirePro: vi.fn((name: string) => `${name} requires Pro — upgrade message`),
-  resetLicenseCache: vi.fn(),
-}));
-
 vi.mock("../../src/services/market-filter.js", () => ({
   checkMarketQuality: vi.fn(),
 }));
 
 import { handleCheckMarket } from "../../src/tools/check-market.js";
-import { checkLicense } from "../../src/utils/license.js";
 import { checkMarketQuality } from "../../src/services/market-filter.js";
 
-const mockLicense = vi.mocked(checkLicense);
 const mockQuality = vi.mocked(checkMarketQuality);
 
 function passing(midPrice = 0.55) {
@@ -37,16 +29,9 @@ function failing(reasons: string[]) {
 
 describe("handleCheckMarket", () => {
   beforeEach(() => {
-    mockLicense.mockResolvedValue(true);
     mockQuality.mockResolvedValue(passing());
   });
 
-  it("returns Pro upgrade message for free tier", async () => {
-    mockLicense.mockResolvedValue(false);
-    const result = await handleCheckMarket({ token_id: "tok" });
-    expect(result).toContain("Pro");
-    expect(mockQuality).not.toHaveBeenCalled();
-  });
 
   it("renders PASS verdict and metrics table", async () => {
     const result = await handleCheckMarket({ token_id: "tok" });

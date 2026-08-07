@@ -1,8 +1,6 @@
 import { log } from "../utils/logger.js";
 import { fetchWithRetry } from "../utils/fetch.js";
-
-const CLOB_API_BASE = "https://clob.polymarket.com";
-const GAMMA_API_BASE = "https://gamma-api.polymarket.com";
+import { GAMMA_API_BASE } from "../constants.js";
 
 export interface ArbitrageOpportunity {
   conditionId: string;

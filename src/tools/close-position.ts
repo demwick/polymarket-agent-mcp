@@ -1,7 +1,6 @@
 import { z } from "zod";
 import Database from "better-sqlite3";
 import { updateTradeExit } from "../db/queries.js";
-import { checkLicense, requirePro } from "../utils/license.js";
 import { log } from "../utils/logger.js";
 
 export const closePositionSchema = z.object({
@@ -10,8 +9,6 @@ export const closePositionSchema = z.object({
 });
 
 export async function handleClosePosition(db: Database.Database, input: z.infer<typeof closePositionSchema>): Promise<string> {
-  const isPro = await checkLicense();
-  if (!isPro) return requirePro("close_position");
 
   const trade = db.prepare("SELECT * FROM trades WHERE id = ? AND status IN ('simulated', 'executed')").get(input.trade_id) as any;
 

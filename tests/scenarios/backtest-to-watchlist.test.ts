@@ -5,19 +5,13 @@
  * Chains handleBacktestTrader → handleScoreTrader → handleWatchWallet →
  * handleListWatchlist against a single shared in-memory DB. The Backtester
  * and ConvictionScorer services are mocked at module level (since they hit
- * external APIs), but watchlist queries and license gating run for real.
+ * external APIs), but watchlist queries run for real.
  * Verifies the research → decide → subscribe flow end-to-end.
  */
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import type Database from "better-sqlite3";
 import type { BacktestResult } from "../../src/services/backtester.js";
 import type { ConvictionScore } from "../../src/services/conviction-scorer.js";
-
-vi.mock("../../src/utils/license.js", () => ({
-  checkLicense: vi.fn().mockResolvedValue(true),
-  requirePro: vi.fn((name: string) => `${name} requires Pro`),
-  resetLicenseCache: vi.fn(),
-}));
 
 vi.mock("../../src/services/backtester.js", () => ({
   backtestTrader: vi.fn(),

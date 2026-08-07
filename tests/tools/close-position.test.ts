@@ -4,19 +4,10 @@ import { initializeDb } from "../../src/db/schema.js";
 import { handleClosePosition } from "../../src/tools/close-position.js";
 import { recordTrade, getTradeHistory } from "../../src/db/queries.js";
 
-vi.mock("../../src/utils/license.js", () => ({
-  checkLicense: vi.fn().mockResolvedValue(true),
-  requirePro: vi.fn((name: string) => `${name} requires Pro`),
-  resetLicenseCache: vi.fn(),
-}));
-
 vi.mock("../../src/services/price-service.js", () => ({
   getMarketPriceByCondition: vi.fn().mockResolvedValue({ price: 0.75, tokenId: "tok1" }),
   getMarketPrice: vi.fn().mockResolvedValue(null),
 }));
-
-import { checkLicense } from "../../src/utils/license.js";
-const mockCheckLicense = vi.mocked(checkLicense);
 
 describe("handleClosePosition", () => {
   let db: Database.Database;
@@ -24,14 +15,8 @@ describe("handleClosePosition", () => {
   beforeEach(() => {
     db = new Database(":memory:");
     initializeDb(db);
-    mockCheckLicense.mockResolvedValue(true);
   });
 
-  it("requires Pro license", async () => {
-    mockCheckLicense.mockResolvedValue(false);
-    const result = await handleClosePosition(db, { trade_id: 1, reason: "manual" });
-    expect(result).toContain("Pro");
-  });
 
   it("returns error for non-existent trade", async () => {
     const result = await handleClosePosition(db, { trade_id: 999, reason: "manual" });

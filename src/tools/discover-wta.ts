@@ -1,6 +1,5 @@
 import { z } from "zod";
 import { discoverWtaMarkets } from "../services/wta-discovery.js";
-import { checkLicense, requirePro } from "../utils/license.js";
 
 export const discoverWtaSchema = z.object({
   discount_pct: z.number().min(5).max(50).optional().default(30).describe("Minimum discount percentage below fair price to qualify as a stink bid opportunity (5-50%)"),
@@ -9,7 +8,6 @@ export const discoverWtaSchema = z.object({
 export type DiscoverWtaInput = z.infer<typeof discoverWtaSchema>;
 
 export async function handleDiscoverWta(input: DiscoverWtaInput): Promise<string> {
-  const isPro = await checkLicense(); if (!isPro) return requirePro("discover_wta");
   const markets = await discoverWtaMarkets(input.discount_pct);
 
   if (markets.length === 0) {

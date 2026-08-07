@@ -9,7 +9,6 @@ Trade, analyze, and automate Polymarket prediction markets via AI
 Full-featured MCP server for Polymarket — search markets, execute trades, copy top traders, analyze smart money flow, backtest strategies, and manage your portfolio. All through natural language via Claude Code, Cursor, or any MCP-compatible AI assistant. Includes 48 tools spanning direct trading, market discovery, trader analysis, copy trading automation, and portfolio management with stop-loss/take-profit.
 
 ## Setup Requirements
-- `MCP_LICENSE_KEY` (optional): License key for Pro features. Get it at https://mcp-marketplace.io/server/polymarket-agent-mcp
 - `COPY_MODE` (optional): Set to `preview` (default, simulated) or `live` (real orders)
 - `DAILY_BUDGET` (optional): Max daily spend in USDC (default: $20)
 - `POLY_PRIVATE_KEY` (optional): Polygon wallet private key — required for live trading
@@ -39,8 +38,7 @@ Finance
 - Live mode for real order execution via Polymarket CLOB API
 - Daily budget management with conviction-based multipliers
 - Separate monitoring dashboard (polymarket-dashboard project)
-- Free tier: market search, basic discovery, 3 wallet watchlist
-- Pro tier: full copy trading, backtest, smart flow, rebalance, unlimited wallets
+- All 48 tools are free and unrestricted
 
 ## Getting Started
 - "Search for bitcoin markets" — finds active Polymarket markets about Bitcoin

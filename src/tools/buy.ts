@@ -3,7 +3,6 @@ import Database from "better-sqlite3";
 import { TradeExecutor, type TradeOrder } from "../services/trade-executor.js";
 import { resolveMarketByConditionId, pickTokenId, pickPrice } from "../services/market-resolver.js";
 import { checkMarketQuality } from "../services/market-filter.js";
-import { checkLicense, requirePro } from "../utils/license.js";
 import { checkSafetyLimits } from "../utils/safety.js";
 import { log } from "../utils/logger.js";
 
@@ -15,12 +14,6 @@ export const buySchema = z.object({
 });
 
 export async function handleBuy(db: Database.Database, executor: TradeExecutor, input: z.infer<typeof buySchema>): Promise<string> {
-  // Live mode requires Pro
-  if (executor.getMode() === "live") {
-    const isPro = await checkLicense();
-    if (!isPro) return requirePro("buy (live mode)");
-  }
-
   const marketInfo = await resolveMarketByConditionId(input.condition_id);
   if (!marketInfo) return "Could not resolve market. Check the condition_id is correct.";
 

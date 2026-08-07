@@ -7,8 +7,7 @@ import { checkMarketQuality } from "./market-filter.js";
 import { PositionTracker } from "./position-tracker.js";
 import { log } from "../utils/logger.js";
 import { fetchWithRetry } from "../utils/fetch.js";
-
-const DATA_API_BASE = "https://data-api.polymarket.com";
+import { DATA_API_BASE } from "../constants.js";
 
 export interface RawActivity {
   type: string;

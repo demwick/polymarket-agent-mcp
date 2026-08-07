@@ -1,8 +1,7 @@
 import { z } from "zod";
 import { fetchWithRetry } from "../utils/fetch.js";
 import { log } from "../utils/logger.js";
-
-const DATA_API_BASE = "https://data-api.polymarket.com";
+import { DATA_API_BASE } from "../constants.js";
 
 export const getTopHoldersSchema = z.object({
   condition_id: z.string().describe("Polymarket market condition ID to find top holders for"),

@@ -1,8 +1,7 @@
 import { z } from "zod";
 import { fetchWithRetry } from "../utils/fetch.js";
 import { log } from "../utils/logger.js";
-
-const GAMMA_API_BASE = "https://gamma-api.polymarket.com";
+import { GAMMA_API_BASE } from "../constants.js";
 
 export const trendingMarketsSchema = z.object({
   period: z.enum(["24h", "7d", "30d"]).optional().default("24h").describe("Volume period to rank by"),

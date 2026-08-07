@@ -1,6 +1,5 @@
 import { z } from "zod";
 import { backtestTrader } from "../services/backtester.js";
-import { checkLicense, requirePro } from "../utils/license.js";
 
 export const backtestTraderSchema = z.object({
   address: z.string().regex(/^0x[a-fA-F0-9]{40}$/, "Must be a valid Ethereum address (0x + 40 hex chars)").describe("Ethereum wallet address of the trader to backtest"),
@@ -8,8 +7,6 @@ export const backtestTraderSchema = z.object({
 });
 
 export async function handleBacktestTrader(input: z.infer<typeof backtestTraderSchema>): Promise<string> {
-  const isPro = await checkLicense();
-  if (!isPro) return requirePro("backtest_trader");
 
   const result = await backtestTrader(input.address, input.copy_budget);
   const s = result.summary;

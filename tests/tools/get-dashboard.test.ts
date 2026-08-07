@@ -7,15 +7,6 @@ import { WalletMonitor } from "../../src/services/wallet-monitor.js";
 import { TradeExecutor } from "../../src/services/trade-executor.js";
 import { addToWatchlist, recordTrade } from "../../src/db/queries.js";
 
-vi.mock("../../src/utils/license.js", () => ({
-  checkLicense: vi.fn().mockResolvedValue(false),
-  requirePro: vi.fn((name: string) => `${name} requires Pro`),
-  resetLicenseCache: vi.fn(),
-}));
-
-import { checkLicense } from "../../src/utils/license.js";
-const mockCheckLicense = vi.mocked(checkLicense);
-
 describe("handleGetDashboard", () => {
   let db: Database.Database;
   let bm: BudgetManager;
@@ -28,22 +19,17 @@ describe("handleGetDashboard", () => {
     bm = new BudgetManager(db, 20);
     executor = new TradeExecutor(db, "preview");
     monitor = new WalletMonitor(db, bm, executor, 3);
-    mockCheckLicense.mockResolvedValue(false);
   });
 
-  it("renders dashboard with basic stats (free tier)", async () => {
+  it("renders dashboard with basic stats", async () => {
     const result = await handleGetDashboard(db, bm, monitor, "preview");
     expect(result).toContain("PREVIEW MODE");
-    expect(result).toContain("FREE");
     expect(result).toContain("Budget");
     expect(result).toContain("Win Rate");
     expect(result).toContain("Stopped");
-    expect(result).toContain("Upgrade to Pro");
   });
 
-  it("shows trade history for Pro users", async () => {
-    mockCheckLicense.mockResolvedValue(true);
-
+  it("shows trade history", async () => {
     recordTrade(db, {
       trader_address: "0xabc",
       market_slug: "test-market",
@@ -58,7 +44,6 @@ describe("handleGetDashboard", () => {
     });
 
     const result = await handleGetDashboard(db, bm, monitor, "preview");
-    expect(result).toContain("PRO");
     expect(result).toContain("Recent Trades");
     expect(result).toContain("test-market");
   });

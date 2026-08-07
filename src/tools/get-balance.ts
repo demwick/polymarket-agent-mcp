@@ -1,4 +1,3 @@
-import { z } from "zod";
 import Database from "better-sqlite3";
 import { getTradeStats, getOpenPositions, getDailySpent } from "../db/queries.js";
 import { BudgetManager } from "../services/budget-manager.js";

@@ -4,29 +4,14 @@ import { initializeDb } from "../../src/db/schema.js";
 import { handleGetTradeHistory } from "../../src/tools/get-trade-history.js";
 import { recordTrade } from "../../src/db/queries.js";
 
-vi.mock("../../src/utils/license.js", () => ({
-  checkLicense: vi.fn().mockResolvedValue(true),
-  requirePro: vi.fn((name: string) => `${name} requires Pro`),
-  resetLicenseCache: vi.fn(),
-}));
-
-import { checkLicense } from "../../src/utils/license.js";
-const mockCheckLicense = vi.mocked(checkLicense);
-
 describe("handleGetTradeHistory", () => {
   let db: Database.Database;
 
   beforeEach(() => {
     db = new Database(":memory:");
     initializeDb(db);
-    mockCheckLicense.mockResolvedValue(true);
   });
 
-  it("requires Pro license", async () => {
-    mockCheckLicense.mockResolvedValue(false);
-    const result = await handleGetTradeHistory(db, { limit: 20 });
-    expect(result).toContain("Pro");
-  });
 
   it("returns message when no trades", async () => {
     const result = await handleGetTradeHistory(db, { limit: 20 });

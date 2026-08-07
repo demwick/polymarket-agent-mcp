@@ -24,7 +24,7 @@ MCP server for Polymarket trading and automation. Three-layer design: **Tools �
 
 ### Layers
 
-**Tools** (`src/tools/*.ts`): Each file exports a Zod schema and an async handler function. Tools validate input, check license tier (free vs Pro), call services, and return markdown-formatted strings. All tools are registered in `index.ts` via `server.tool()`.
+**Tools** (`src/tools/*.ts`): Each file exports a Zod schema and an async handler function. Tools validate input, call services, and return markdown-formatted strings. All tools are registered in `index.ts` via `server.tool()`.
 
 **Services** (`src/services/*.ts`): Business logic layer.
 - `WalletMonitor` — polls watched wallets on an interval, calls `filterNewTrades` to find copy candidates, runs market quality filter, uses `BudgetManager` to size positions, executes via `TradeExecutor`. Has tick-lock to prevent overlapping executions.
@@ -39,22 +39,21 @@ MCP server for Polymarket trading and automation. Three-layer design: **Tools �
 
 **Database** (`src/db/`): SQLite via better-sqlite3 with WAL mode. `schema.ts` creates tables + indexes + safe migrations. `queries.ts` has all prepared statements. Tables: `watchlist`, `trades`, `daily_budget`, `config`, `agent_cycles`, `market_watchlist`.
 
-**Utils** (`src/utils/`): `fetchWithRetry` (10s timeout, 2 retries with backoff, 429 rate limit handling), `logger` (writes to stderr, MCP uses stdout for JSON-RPC), `license` (MCP Marketplace verification with explicit offline override), `config` (dotenv + Zod validation singleton).
+**Utils** (`src/utils/`): `fetchWithRetry` (10s timeout, 2 retries with backoff, 429 rate limit handling), `logger` (writes to stderr, MCP uses stdout for JSON-RPC), `tool-wrapper` (`safe()` error boundary around every tool), `config` (dotenv + Zod validation singleton).
 
 ### Key Patterns
 
 - **ESM throughout** — `"type": "module"` in package.json, all imports use `.js` extensions
 - **Zod for input validation** — every tool has a schema; `getConfig()` validates env vars
-- **License gating** — `checkLicense()` is async (calls external API), cached after first call. Free tier has limits (3 wallets, 1 leaderboard page). Pro features: monitor, trade history, go_live, set_config, close_position, backtest, discover_flow, rebalance.
 - **Dual execution mode** — `COPY_MODE=preview` (default) simulates trades in DB; `COPY_MODE=live` requires Polymarket API credentials and places real orders.
+- **Per-request MCP server** — `createMcpServer()` builds a fresh instance for every HTTP request; the SDK refuses a second `connect()` on a connected instance.
 
 ### External APIs
 
 - **Data API** (`data-api.polymarket.com`) — trader activity, positions, leaderboard
 - **Gamma API** (`gamma-api.polymarket.com`) — market metadata, prices, resolution status
 - **CLOB API** (`clob.polymarket.com`) — order book, live order placement, price history, market resolution
-- **MCP Marketplace** (`mcp-marketplace.io`) — license verification
 
 ### Test Structure
 
-Tests mirror source: `tests/db/`, `tests/services/`, `tests/tools/`, `tests/utils/`. Uses vitest with in-memory SQLite (`new Database(":memory:")`). External API calls are mocked via `vi.spyOn(globalThis, "fetch")`. Services using `fetchWithRetry` need `vi.mock("../../src/utils/fetch.js")` to bypass retry delays. License checks in tool tests are mocked via `vi.mock("../../src/utils/license.js")`.
+Tests mirror source: `tests/db/`, `tests/services/`, `tests/tools/`, `tests/utils/`. Uses vitest with in-memory SQLite (`new Database(":memory:")`). External API calls are mocked via `vi.spyOn(globalThis, "fetch")`. Services using `fetchWithRetry` need `vi.mock("../../src/utils/fetch.js")` to bypass retry delays.

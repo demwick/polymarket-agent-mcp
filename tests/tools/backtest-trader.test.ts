@@ -1,21 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
-vi.mock("../../src/utils/license.js", () => ({
-  checkLicense: vi.fn().mockResolvedValue(true),
-  requirePro: vi.fn((name: string) => `${name} requires Pro`),
-  resetLicenseCache: vi.fn(),
-}));
-
 vi.mock("../../src/services/backtester.js", () => ({
   backtestTrader: vi.fn(),
 }));
 
 import { handleBacktestTrader } from "../../src/tools/backtest-trader.js";
-import { checkLicense } from "../../src/utils/license.js";
 import { backtestTrader } from "../../src/services/backtester.js";
 import type { BacktestResult } from "../../src/services/backtester.js";
 
-const mockLicense = vi.mocked(checkLicense);
 const mockBacktest = vi.mocked(backtestTrader);
 
 const VALID_ADDR = "0x1234567890abcdef1234567890abcdef12345678";
@@ -67,16 +59,9 @@ function makeResult(overrides: Partial<BacktestResult> = {}): BacktestResult {
 describe("handleBacktestTrader", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockLicense.mockResolvedValue(true);
     mockBacktest.mockResolvedValue(makeResult());
   });
 
-  it("requires Pro license", async () => {
-    mockLicense.mockResolvedValue(false);
-    const result = await handleBacktestTrader({ address: VALID_ADDR, copy_budget: 5 });
-    expect(result).toContain("requires Pro");
-    expect(mockBacktest).not.toHaveBeenCalled();
-  });
 
   it("renders summary table with key metrics", async () => {
     const result = await handleBacktestTrader({ address: VALID_ADDR, copy_budget: 5 });

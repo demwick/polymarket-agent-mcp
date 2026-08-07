@@ -1,13 +1,10 @@
 import { z } from "zod";
 import { TradeExecutor } from "../services/trade-executor.js";
-import { checkLicense, requirePro } from "../utils/license.js";
 import { log } from "../utils/logger.js";
 
 export const cancelOrdersSchema = z.object({});
 
 export async function handleCancelOrders(executor: TradeExecutor): Promise<string> {
-  const isPro = await checkLicense();
-  if (!isPro) return requirePro("cancel_orders");
 
   if (executor.getMode() !== "live") {
     return "Cancel orders only works in live mode. Use `go_live` to switch to live trading first.";

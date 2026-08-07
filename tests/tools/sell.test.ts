@@ -4,16 +4,7 @@ import { initializeDb } from "../../src/db/schema.js";
 import { TradeExecutor } from "../../src/services/trade-executor.js";
 import { recordTrade, getTradeHistory } from "../../src/db/queries.js";
 
-vi.mock("../../src/utils/license.js", () => ({
-  checkLicense: vi.fn().mockResolvedValue(true),
-  requirePro: vi.fn((name: string) => `${name} requires Pro`),
-  resetLicenseCache: vi.fn(),
-}));
-
 import { handleSell } from "../../src/tools/sell.js";
-import { checkLicense } from "../../src/utils/license.js";
-
-const mockLicense = vi.mocked(checkLicense);
 
 function seedPosition(db: Database.Database, overrides: Record<string, unknown> = {}): number {
   return recordTrade(db, {
@@ -39,23 +30,9 @@ describe("handleSell", () => {
     db = new Database(":memory:");
     initializeDb(db);
     executor = new TradeExecutor(db, "preview");
-    mockLicense.mockResolvedValue(true);
   });
 
-  it("preview mode does NOT require Pro license", async () => {
-    mockLicense.mockResolvedValue(false);
-    const id = seedPosition(db);
-    const result = await handleSell(db, executor, { trade_id: id });
-    expect(result).not.toContain("Pro");
-    expect(result).toContain("Simulated");
-  });
 
-  it("live mode requires Pro license", async () => {
-    executor.setMode("live");
-    mockLicense.mockResolvedValue(false);
-    const result = await handleSell(db, executor, { trade_id: 1 });
-    expect(result).toContain("Pro");
-  });
 
   it("returns error when neither trade_id nor condition_id provided", async () => {
     const result = await handleSell(db, executor, {});

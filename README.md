@@ -8,9 +8,9 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node.js](https://img.shields.io/badge/node-18%2B-brightgreen)](https://nodejs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-blue)](https://www.typescriptlang.org)
-[![MCP Protocol](https://img.shields.io/badge/MCP-1.0-purple)](https://modelcontextprotocol.io)
+[![MCP SDK](https://img.shields.io/badge/MCP%20SDK-1.30-purple)](https://modelcontextprotocol.io)
 [![Tools](https://img.shields.io/badge/tools-48-blue)](#tool-overview)
-[![Tests](https://img.shields.io/badge/tests-207%20passing-brightgreen)](tests/)
+[![Tests](https://img.shields.io/badge/tests-435%20passing-brightgreen)](tests/)
 [![SafeSkill 97/100](https://img.shields.io/badge/SafeSkill-97%2F100_Verified%20Safe-brightgreen)](https://safeskill.dev/scan/demwick-polymarket-agent-mcp)
 [![Socket Badge](https://socket.dev/api/badge/npm/package/polymarket-agent-mcp)](https://socket.dev/npm/package/polymarket-agent-mcp)
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/demwick/polymarket-agent-mcp/badge)](https://securityscorecards.dev/viewer/?uri=github.com/demwick/polymarket-agent-mcp)
@@ -98,79 +98,79 @@ Just talk naturally to your AI assistant:
 
 | Tool | Description |
 |------|-------------|
-| `search_markets` | Search markets by keyword (bitcoin, election, UFC...) |
-| `discover_traders` | Find top traders by PnL and volume |
-| `discover_markets` | Find markets by end date and category |
-| `trending_markets` | Top markets by 24h/7d/30d volume |
-| `featured_markets` | Most liquid markets by category (politics, sports, crypto...) |
-| `discover_wta` | WTA tennis markets with stink bid prices |
-| `discover_flow` | Smart money signals — multiple top traders buying same market |
-| `find_related` | Find markets related to a topic or market |
-| `get_market_events` | Browse all markets under an event |
+| `markets.search` | Search markets by keyword (bitcoin, election, UFC...) |
+| `traders.discover` | Find top traders by PnL and volume |
+| `markets.discover` | Find markets by end date and category |
+| `markets.trending` | Top markets by 24h/7d/30d volume |
+| `markets.featured` | Most liquid markets by category (politics, sports, crypto...) |
+| `wta.discover` | WTA tennis markets with stink bid prices |
+| `flow.discover` | Smart money signals — multiple top traders buying same market |
+| `markets.related` | Find markets related to a topic or market |
+| `markets.events` | Browse all markets under an event |
 
 ### Analysis
 
 | Tool | Description |
 |------|-------------|
-| `analyze_opportunity` | AI-powered BUY/SELL/HOLD recommendation |
-| `analyze_trader` | Detailed trader profile, win rate, P&L |
-| `score_trader` | Conviction score (0-100) across 5 dimensions |
-| `check_market` | Market quality — spread, depth, price range |
-| `get_price` | Live bid/ask/spread prices |
-| `get_price_history` | Historical prices with sparkline (1h to 1m) |
-| `get_top_holders` | Biggest position holders in a market |
-| `compare_markets` | Side-by-side comparison of 2-5 markets |
+| `markets.analyze` | AI-powered BUY/SELL/HOLD recommendation |
+| `traders.analyze` | Detailed trader profile, win rate, P&L |
+| `traders.score` | Conviction score (0-100) across 5 dimensions |
+| `markets.check` | Market quality — spread, depth, price range |
+| `markets.price` | Live bid/ask/spread prices |
+| `markets.price_history` | Historical prices with sparkline (1h to 1m) |
+| `markets.holders` | Biggest position holders in a market |
+| `markets.compare` | Side-by-side comparison of 2-5 markets |
 
 ### Trading
 
 | Tool | Description |
 |------|-------------|
-| `buy` | Buy shares on any market |
-| `sell` | Sell an open position |
-| `batch_order` | Execute up to 10 orders at once |
-| `place_stink_bid` | Place limit orders at discount |
-| `cancel_orders` | Cancel all open orders |
-| `get_open_orders` | View pending limit orders |
-| `get_order_status` | Check status of a specific order |
-| `go_live` | Switch from preview to live mode |
+| `orders.buy` | Buy shares on any market |
+| `orders.sell` | Sell an open position |
+| `orders.batch` | Execute up to 10 orders at once |
+| `wta.bid` | Place limit orders at discount |
+| `orders.cancel` | Cancel all open orders |
+| `orders.list` | View pending limit orders |
+| `orders.status` | Check status of a specific order |
+| `config.go_live` | Switch from preview to live mode |
 
 ### Copy Trading
 
 | Tool | Description |
 |------|-------------|
-| `watch_wallet` | Add/remove traders from watchlist |
-| `start_monitor` | Start automatic copy trading loop |
-| `stop_monitor` | Stop monitoring |
-| `rebalance` | Remove underperforming traders |
-| `backtest_trader` | Simulate copying a trader's past trades |
+| `watchlist.add` | Add/remove traders from watchlist |
+| `monitor.start` | Start automatic copy trading loop |
+| `monitor.stop` | Stop monitoring |
+| `watchlist.rebalance` | Remove underperforming traders |
+| `traders.backtest` | Simulate copying a trader's past trades |
 
 ### Portfolio & Risk
 
 | Tool | Description |
 |------|-------------|
-| `get_balance` | Account balance, budget, and P&L |
-| `get_portfolio` | Multi-wallet overview with P&L per trader |
-| `get_positions` | Open/closed positions |
-| `close_position` | Manually close a position |
-| `set_exit_rules` | Set stop-loss and take-profit levels |
-| `check_exits` | Check positions for resolution |
-| `assess_risk` | Portfolio risk scoring and warnings |
-| `optimize_portfolio` | AI-powered optimization (conservative/balanced/aggressive) |
-| `watch_market` | Market watchlist with price alerts |
-| `detect_arbitrage` | Find YES+NO price discrepancies |
+| `portfolio.balance` | Account balance, budget, and P&L |
+| `portfolio.get` | Multi-wallet overview with P&L per trader |
+| `positions.list` | Open/closed positions |
+| `positions.close` | Manually close a position |
+| `positions.set_exit_rules` | Set stop-loss and take-profit levels |
+| `positions.check_exits` | Check positions for resolution |
+| `portfolio.risk` | Portfolio risk scoring and warnings |
+| `portfolio.optimize` | AI-powered optimization (conservative/balanced/aggressive) |
+| `markets.watch` | Market watchlist with price alerts |
+| `markets.watch_price` | Live WebSocket price subscriptions |
+| `markets.arbitrage` | Find YES+NO price discrepancies |
 
 ### Configuration
 
 | Tool | Description |
 |------|-------------|
-| `set_config` | Update bot settings |
-| `set_safety_limits` | Max order size, exposure cap, spread tolerance |
-| `get_dashboard` | Terminal-formatted dashboard |
-| `get_trade_history` | Trade history with filters |
-| `list_watchlist` | Show watched wallets |
-| `log_cycle` | Log agent cycle for dashboard |
-| `get_trader_positions` | View a trader's open positions |
-| `discover_wta` | WTA tennis market discovery |
+| `config.set` | Update bot settings |
+| `config.safety_limits` | Max order size, exposure cap, spread tolerance |
+| `dashboard.get` | Terminal-formatted dashboard |
+| `trades.history` | Trade history with filters |
+| `watchlist.list` | Show watched wallets |
+| `agent.log_cycle` | Log agent cycle for dashboard |
+| `traders.positions` | View a trader's open positions |
 
 ---
 
@@ -248,7 +248,13 @@ The HTTP transport accepts an optional bearer token gated by an environment vari
 
 ### Docker deployment
 
-The included `Dockerfile` builds a multi-stage production image that runs in HTTP mode:
+A prebuilt multi-arch image is published to GHCR on every release:
+
+```bash
+docker pull ghcr.io/demwick/polymarket-agent-mcp:1.7.0
+```
+
+Or build it yourself from the included `Dockerfile`:
 
 ```bash
 docker build -t polymarket-mcp .
@@ -295,7 +301,7 @@ This package has a transparent, minimal footprint. Full disclosure: **[PERMISSIO
 
 | Category | Scope |
 |----------|-------|
-| **Network (outbound)** | 3 Polymarket HTTPS APIs + 1 inbound-only WSS public price stream (`ws-subscriptions-clob.polymarket.com`) + optional license check (`mcp-marketplace.io`) |
+| **Network (outbound)** | 3 Polymarket HTTPS APIs + 1 inbound-only WSS public price stream (`ws-subscriptions-clob.polymarket.com`) |
 | **Filesystem** | Single SQLite database file + `.env` read at startup — nothing else |
 | **Environment** | API credentials (live mode only, in memory only), budget config, mode selection |
 | **Processes** | None — no child processes, no shell commands, no `eval`/`Function` |

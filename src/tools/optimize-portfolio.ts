@@ -1,6 +1,6 @@
 import { z } from "zod";
 import Database from "better-sqlite3";
-import { getOpenPositions, getTradeStats } from "../db/queries.js";
+import { getOpenPositions } from "../db/queries.js";
 import { getMarketPriceByCondition } from "../services/price-service.js";
 import { log } from "../utils/logger.js";
 
@@ -10,7 +10,6 @@ export const optimizePortfolioSchema = z.object({
 
 export async function handleOptimizePortfolio(db: Database.Database, input: z.infer<typeof optimizePortfolioSchema>): Promise<string> {
   const positions = getOpenPositions(db);
-  const stats = getTradeStats(db);
 
   if (positions.length === 0) {
     return "No open positions to optimize.";

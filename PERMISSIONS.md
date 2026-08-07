@@ -18,7 +18,6 @@ This document is the authoritative disclosure of everything `polymarket-agent-mc
 | `gamma-api.polymarket.com` | HTTPS | Read-only market metadata, prices, and resolution status | Read-only public data | Always available |
 | `clob.polymarket.com` | HTTPS | Order book reads; signed order placement | **Write-capable** | Order placement only when `COPY_MODE=live` **and** a user-initiated trade tool is invoked |
 | `ws-subscriptions-clob.polymarket.com` | WSS | Subscribe to real-time public price updates for explicitly watched markets | Inbound-only, unauthenticated | Only when the user calls `markets.watch_price` |
-| `mcp-marketplace.io` | HTTPS | One-time license key verification; result is cached | Credential-bearing (license key only) | At startup when a license key is configured |
 
 All outbound HTTP requests go through `fetchWithRetry` (`src/utils/fetch.ts`) with a 10-second timeout and at most two retries with exponential backoff. **No other outbound connections are made.** No analytics, crash reporting, update checks, or telemetry endpoints are contacted.
 
@@ -46,7 +45,6 @@ This package is designed for **single-tenant** local or private deployments. See
 | `POLY_API_SECRET` | **Secret** | Live mode only | CLOB API secret used for HMAC signing | Sent only to `clob.polymarket.com` |
 | `POLY_API_PASSPHRASE` | **Secret** | Live mode only | CLOB API passphrase | Sent only to `clob.polymarket.com` |
 | `POLY_FUNDER_ADDRESS` | Sensitive | Live mode only | Funder wallet address in CLOB order payloads | Sent only to `clob.polymarket.com` |
-| `MCP_LICENSE_KEY` | **Secret** | No | MCP Marketplace license for Pro features | Sent only to `mcp-marketplace.io` at startup; cached in memory afterwards |
 | `MCP_API_KEY` | **Secret** | No | Bearer token gating the optional HTTP transport | Compared in-process against incoming `Authorization` headers; never transmitted outbound |
 | `DB_PATH` | Public | No (default `./copytrader.db`) | Override SQLite database file location | Read at startup |
 | `PORT` | Public | No (default `3000`) | HTTP transport listen port | Read at startup |

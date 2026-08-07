@@ -1,6 +1,5 @@
 import { z } from "zod";
 import { getPriceHistory, type Interval } from "../services/price-history.js";
-import { checkLicense, requirePro } from "../utils/license.js";
 
 export const getPriceHistorySchema = z.object({
   token_id: z.string().describe("Market token ID to fetch price history for"),
@@ -8,7 +7,6 @@ export const getPriceHistorySchema = z.object({
 });
 
 export async function handleGetPriceHistory(input: z.infer<typeof getPriceHistorySchema>): Promise<string> {
-  const isPro = await checkLicense(); if (!isPro) return requirePro("get_price_history");
   const history = await getPriceHistory(input.token_id, input.interval as Interval);
 
   if (history.points.length === 0) {

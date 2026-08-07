@@ -5,12 +5,6 @@ import { TradeExecutor } from "../../src/services/trade-executor.js";
 import { getTradeHistory } from "../../src/db/queries.js";
 import type { MarketInfo } from "../../src/services/market-resolver.js";
 
-vi.mock("../../src/utils/license.js", () => ({
-  checkLicense: vi.fn().mockResolvedValue(true),
-  requirePro: vi.fn((name: string) => `${name} requires Pro`),
-  resetLicenseCache: vi.fn(),
-}));
-
 vi.mock("../../src/services/market-resolver.js", async () => {
   const actual = await vi.importActual<typeof import("../../src/services/market-resolver.js")>(
     "../../src/services/market-resolver.js"
@@ -23,11 +17,9 @@ vi.mock("../../src/services/market-filter.js", () => ({
 }));
 
 import { handleBuy } from "../../src/tools/buy.js";
-import { checkLicense } from "../../src/utils/license.js";
 import { resolveMarketByConditionId } from "../../src/services/market-resolver.js";
 import { checkMarketQuality } from "../../src/services/market-filter.js";
 
-const mockLicense = vi.mocked(checkLicense);
 const mockResolve = vi.mocked(resolveMarketByConditionId);
 const mockQuality = vi.mocked(checkMarketQuality);
 
@@ -63,32 +55,11 @@ describe("handleBuy", () => {
     db = new Database(":memory:");
     initializeDb(db);
     executor = new TradeExecutor(db, "preview");
-    mockLicense.mockResolvedValue(true);
     mockResolve.mockResolvedValue(fakeMarket());
     mockQuality.mockResolvedValue(passingQuality());
   });
 
-  it("preview mode does NOT require Pro license", async () => {
-    mockLicense.mockResolvedValue(false);
-    const result = await handleBuy(db, executor, {
-      condition_id: "0xcond",
-      amount: 5,
-      outcome: "YES",
-    });
-    expect(result).not.toContain("Pro");
-    expect(result).toContain("Simulated");
-  });
 
-  it("live mode requires Pro license", async () => {
-    executor.setMode("live");
-    mockLicense.mockResolvedValue(false);
-    const result = await handleBuy(db, executor, {
-      condition_id: "0xcond",
-      amount: 5,
-      outcome: "YES",
-    });
-    expect(result).toContain("Pro");
-  });
 
   it("returns error when market cannot be resolved", async () => {
     mockResolve.mockResolvedValue(null);
