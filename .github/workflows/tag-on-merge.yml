@@ -4,13 +4,19 @@ on:
   pull_request:
     branches: [main]
     types: [closed]
+  # Lets a partially completed release be finished without a second merge —
+  # every step below is a no-op when its result already exists.
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
   tag-and-release:
-    if: github.event.pull_request.merged == true && startsWith(github.event.pull_request.title, 'Release v')
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.pull_request.merged == true &&
+       startsWith(github.event.pull_request.title, 'Release v'))
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -25,6 +31,10 @@ jobs:
         run: |
           VERSION=$(node -p "require('./package.json').version")
           echo "version=$VERSION" >> $GITHUB_OUTPUT
+          if git ls-remote --exit-code --tags origin "v${VERSION}" >/dev/null 2>&1; then
+            echo "Tag v${VERSION} already exists, leaving it alone"
+            exit 0
+          fi
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git tag "v${VERSION}"
@@ -44,9 +54,15 @@ jobs:
       - run: npm test
 
       - name: Publish to npm
-        run: npm publish --provenance --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          VERSION: ${{ steps.tag.outputs.version }}
+        run: |
+          if npm view "polymarket-agent-mcp@${VERSION}" version >/dev/null 2>&1; then
+            echo "${VERSION} is already on npm, skipping publish"
+            exit 0
+          fi
+          npm publish --provenance --access public
 
       - name: Pack tarball for release
         id: pack
@@ -80,7 +96,15 @@ jobs:
       - name: Publish to MCP Registry
         run: |
           ./mcp-publisher login github-oidc
-          ./mcp-publisher publish
+          set +e
+          OUTPUT=$(./mcp-publisher publish 2>&1)
+          CODE=$?
+          echo "$OUTPUT"
+          if [ $CODE -ne 0 ] && echo "$OUTPUT" | grep -qi "already exists"; then
+            echo "This version is already in the registry, nothing to do"
+            exit 0
+          fi
+          exit $CODE
 
       - name: Summary
         env:
