@@ -1,8 +1,7 @@
 import { z } from "zod";
 import { fetchWithRetry } from "../utils/fetch.js";
 import { log } from "../utils/logger.js";
-
-const GAMMA_API_BASE = "https://gamma-api.polymarket.com";
+import { GAMMA_API_BASE } from "../constants.js";
 
 export const searchMarketsSchema = z.object({
   query: z.string().min(1).describe("Search query (e.g. 'bitcoin', 'election', 'UFC')"),

@@ -1,8 +1,7 @@
 import { log } from "../utils/logger.js";
 import { fetchWithRetry } from "../utils/fetch.js";
 import { fetchLeaderboardPage } from "./leaderboard.js";
-
-const DATA_API_BASE = "https://data-api.polymarket.com";
+import { DATA_API_BASE } from "../constants.js";
 
 export interface FlowSignal {
   conditionId: string;
@@ -85,7 +84,7 @@ export async function discoverSmartFlow(opts: FlowOptions = {}): Promise<FlowSig
 
   // Build signals (only groups with >= minSignalTraders unique traders)
   const signals: FlowSignal[] = [];
-  for (const [key, trades] of groups) {
+  for (const [, trades] of groups) {
     if (trades.length < minSignalTraders) continue;
 
     const totalAmount = trades.reduce((sum, t) => sum + t.amount, 0);

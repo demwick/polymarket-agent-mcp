@@ -4,6 +4,7 @@ import { Wallet } from "@ethersproject/wallet";
 import { recordTrade, recordTradeWithBudget, resolveDailyLimit } from "../db/queries.js";
 import { getConfig, getSigningKey, hasLiveCredentials } from "../utils/config.js";
 import { log } from "../utils/logger.js";
+import { CLOB_API_BASE } from "../constants.js";
 
 /** Redact private keys and hex secrets from error messages to prevent leaks in logs. */
 function sanitizeError(msg: string): string {
@@ -157,7 +158,7 @@ export class TradeExecutor {
     // never logged, persisted, or transmitted except as part of a signed
     // order body sent to clob.polymarket.com over HTTPS.
     const signer = new Wallet(getSigningKey());
-    const host = "https://clob.polymarket.com";
+    const host = CLOB_API_BASE;
 
     const creds = await new ClobClient(host, config.CHAIN_ID, signer).createOrDeriveApiKey();
 

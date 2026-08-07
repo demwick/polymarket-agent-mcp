@@ -1,9 +1,10 @@
 import { log } from "../utils/logger.js";
 import { fetchWithRetry } from "../utils/fetch.js";
+import { CLOB_API_BASE, GAMMA_API_BASE } from "../constants.js";
 
 const ESPN_WTA_URL = "https://site.api.espn.com/apis/site/v2/sports/tennis/wta/scoreboard";
-const GAMMA_EVENTS_URL = "https://gamma-api.polymarket.com/events";
-const CLOB_MARKETS_URL = "https://clob.polymarket.com/markets";
+const GAMMA_EVENTS_URL = `${GAMMA_API_BASE}/events`;
+const CLOB_MARKETS_URL = `${CLOB_API_BASE}/markets`;
 
 export interface WtaMatch {
   player1: string;

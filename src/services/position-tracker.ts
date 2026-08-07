@@ -1,10 +1,8 @@
 import Database from "better-sqlite3";
-import { getOpenPositions, updateTradeExit, getDailySpent, addDailySpent } from "../db/queries.js";
+import { getOpenPositions, updateTradeExit, getDailySpent } from "../db/queries.js";
 import { log } from "../utils/logger.js";
 import { fetchWithRetry } from "../utils/fetch.js";
-
-const DATA_API_BASE = "https://data-api.polymarket.com";
-const CLOB_API_BASE = "https://clob.polymarket.com";
+import { CLOB_API_BASE, DATA_API_BASE } from "../constants.js";
 
 export class PositionTracker {
   constructor(private db: Database.Database) {}

@@ -1,8 +1,7 @@
 import { z } from "zod";
 import { fetchWithRetry } from "../utils/fetch.js";
 import { log } from "../utils/logger.js";
-
-const GAMMA_API_BASE = "https://gamma-api.polymarket.com";
+import { GAMMA_API_BASE } from "../constants.js";
 
 export const getMarketEventsSchema = z.object({
   slug: z.string().optional().describe("Event slug to look up (e.g. 'us-presidential-election-2026')"),

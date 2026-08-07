@@ -1,7 +1,6 @@
 import { log } from "../utils/logger.js";
 import { fetchWithRetry } from "../utils/fetch.js";
-
-const CLOB_API_BASE = "https://clob.polymarket.com";
+import { CLOB_API_BASE } from "../constants.js";
 
 export interface MarketInfo {
   conditionId: string;

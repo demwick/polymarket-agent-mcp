@@ -1,8 +1,7 @@
 import { z } from "zod";
 import { log } from "../utils/logger.js";
 import { fetchWithRetry } from "../utils/fetch.js";
-
-const GAMMA_API_BASE = "https://gamma-api.polymarket.com";
+import { GAMMA_API_BASE } from "../constants.js";
 
 export const discoverMarketsSchema = z.object({
   ending: z.enum(["today", "this_week", "all"]).optional().default("today").describe("Filter by resolution deadline: today, this_week, or all active markets"),

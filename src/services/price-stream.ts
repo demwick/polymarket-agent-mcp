@@ -7,6 +7,7 @@
 // subscription and is torn down on shutdown. See PERMISSIONS.md.
 import WebSocket from "ws";
 import { log } from "../utils/logger.js";
+import { CLOB_WS_URL } from "../constants.js";
 
 export interface PriceUpdate {
   tokenId: string;
@@ -18,7 +19,7 @@ type PriceCallback = (update: PriceUpdate) => void;
 
 // Public market data stream endpoint — no authentication, no payload
 // carries user identity. Documented at clob.polymarket.com/docs.
-const WS_URL = "wss://ws-subscriptions-clob.polymarket.com/ws/market";
+const WS_URL = CLOB_WS_URL;
 
 export class PriceStream {
   private ws: WebSocket | null = null;

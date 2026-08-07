@@ -1,8 +1,7 @@
 import { z } from "zod";
 import { fetchWithRetry } from "../utils/fetch.js";
 import { log } from "../utils/logger.js";
-
-const GAMMA_API_BASE = "https://gamma-api.polymarket.com";
+import { GAMMA_API_BASE } from "../constants.js";
 
 export const featuredMarketsSchema = z.object({
   category: z.enum(["politics", "sports", "crypto", "pop-culture", "business", "science"]).optional().describe("Filter by market category: politics, sports, crypto, pop-culture, business, or science"),
