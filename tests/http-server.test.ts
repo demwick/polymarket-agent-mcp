@@ -78,3 +78,37 @@ describe("HTTP transport", () => {
     expect(await res.json()).toMatchObject({ status: "ok", db: "connected" });
   });
 });
+
+// Parses an SSE-framed JSON-RPC reply, which is what the streamable HTTP
+// transport returns for list requests.
+async function rpcResult(res: Response) {
+  const body = await res.text();
+  const data = body.split("\n").find((l) => l.startsWith("data:"));
+  return JSON.parse((data ?? body).replace(/^data:\s*/, "")).result;
+}
+
+describe("registration", () => {
+  it("lists every tool, prompt and resource", async () => {
+    const [tools, prompts, resources] = await Promise.all([
+      postMcp(rpc(10, "tools/list", {})).then(rpcResult),
+      postMcp(rpc(11, "prompts/list", {})).then(rpcResult),
+      postMcp(rpc(12, "resources/list", {})).then(rpcResult),
+    ]);
+
+    expect(tools.tools).toHaveLength(48);
+    expect(prompts.prompts).toHaveLength(2);
+    expect(resources.resources).toHaveLength(4);
+  });
+
+  it("keeps descriptions and input schemas on the registered tools", async () => {
+    const { tools } = await postMcp(rpc(13, "tools/list", {})).then(rpcResult);
+
+    expect(tools.every((t: { description?: string }) => !!t.description)).toBe(true);
+
+    const discover = tools.find((t: { name: string }) => t.name === "traders.discover");
+    expect(discover.inputSchema.properties).toHaveProperty("pages");
+
+    const noArgs = tools.find((t: { name: string }) => t.name === "watchlist.list");
+    expect(noArgs.inputSchema.properties ?? {}).toEqual({});
+  });
+});
