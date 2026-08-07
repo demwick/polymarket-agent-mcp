@@ -1,5 +1,5 @@
 import Database from "better-sqlite3";
-import { getDailySpent, addDailySpent, getDailyBudgetRemaining, resolveDailyLimit } from "../db/queries.js";
+import { addDailySpent, getDailyBudgetRemaining, resolveDailyLimit } from "../db/queries.js";
 
 export interface CopyAmountInput {
   originalAmount: number;

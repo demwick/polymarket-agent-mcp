@@ -2,7 +2,7 @@ import { z } from "zod";
 import Database from "better-sqlite3";
 import { TradeExecutor } from "../services/trade-executor.js";
 import { discoverWtaMarkets } from "../services/wta-discovery.js";
-import { hasExistingPosition, recordTrade } from "../db/queries.js";
+import { hasExistingPosition } from "../db/queries.js";
 import { log } from "../utils/logger.js";
 
 export const placeStinkBidSchema = z.object({

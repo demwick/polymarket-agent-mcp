@@ -1,4 +1,4 @@
-import { analyzeTrader, type TraderProfile } from "./trader-analyzer.js";
+import { analyzeTrader } from "./trader-analyzer.js";
 import { log } from "../utils/logger.js";
 
 export interface ConvictionScore {
