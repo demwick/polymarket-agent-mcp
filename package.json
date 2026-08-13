@@ -65,7 +65,7 @@
     "@ethersproject/wallet": "^5.8.0",
     "@modelcontextprotocol/sdk": "^1.30.0",
     "@polymarket/clob-client": "^5.8.1",
-    "better-sqlite3": "^12.11.1",
+    "better-sqlite3": "^13.0.3",
     "dotenv": "^17.4.2",
     "ws": "^8.21.2",
     "zod": "^4.4.3"
