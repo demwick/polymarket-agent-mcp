@@ -5,6 +5,11 @@ import { recordTrade, recordTradeWithBudget, resolveDailyLimit } from "../db/que
 import { getConfig, getSigningKey, hasLiveCredentials } from "../utils/config.js";
 import { log } from "../utils/logger.js";
 import { CLOB_API_BASE } from "../constants.js";
+import {
+  evaluateDirectory404Risk,
+  reportDirectory404Outcome,
+  type Directory404Receipt,
+} from "./directory404-risk.js";
 
 /** Redact private keys and hex secrets from error messages to prevent leaks in logs. */
 function sanitizeError(msg: string): string {
@@ -24,6 +29,8 @@ export interface TradeOrder {
   tickSize: string;
   negRisk: boolean;
   orderSide?: "BUY" | "SELL";
+  /** Exact binary outcome, when known. Required for optional 404.directory preflight. */
+  outcome?: "YES" | "NO";
   orderType?: "GTC" | "GTD";
   /** Optional budget info for atomic trade+budget recording (preview mode) */
   budget?: { date: string; spendAmount: number; dailyLimit: number };
@@ -100,9 +107,16 @@ export class TradeExecutor {
       };
     }
 
+    let riskReceipt: Directory404Receipt | null = null;
     try {
       const client = await this.getClobClient();
       const side = order.orderSide === "SELL" ? Side.SELL : Side.BUY;
+      riskReceipt = await evaluateDirectory404Risk(this.db, {
+        marketSlug: order.marketSlug,
+        outcome: order.outcome,
+        side: order.orderSide === "SELL" ? "SELL" : "BUY",
+        estimatedNotionalUsd: order.amount,
+      });
       const resp = await client.createAndPostOrder(
         {
           tokenID: order.tokenId,
@@ -118,7 +132,9 @@ export class TradeExecutor {
       if (!resp || resp.success === false || resp.errorMsg) {
         const reason = resp?.errorMsg ?? "Order rejected by CLOB";
         log("error", `[LIVE] Order rejected: ${reason}`, { order: order.marketSlug, response: resp });
-        return this.recordFailedTrade(order, reason);
+        const result = this.recordFailedTrade(order, reason);
+        await reportDirectory404Outcome(this.db, riskReceipt, "failed");
+        return result;
       }
 
       const tradeId = recordTrade(this.db, {
@@ -140,12 +156,16 @@ export class TradeExecutor {
         orderID: resp.orderID ?? resp.orderIds,
       });
 
-      return { tradeId, mode: "live", status: "executed", message: `Executed: ${order.orderSide ?? "BUY"} $${order.amount} @ ${order.price}` };
+      const result: TradeResult = { tradeId, mode: "live", status: "executed", message: `Executed: ${order.orderSide ?? "BUY"} $${order.amount} @ ${order.price}` };
+      await reportDirectory404Outcome(this.db, riskReceipt, "executed");
+      return result;
     } catch (err: any) {
       const rawMessage = err?.message ?? String(err);
       const message = sanitizeError(rawMessage);
       log("error", `[LIVE] Failed ${order.orderSide ?? "BUY"} on ${order.marketSlug}: ${message}`);
-      return this.recordFailedTrade(order, message);
+      const result = this.recordFailedTrade(order, message);
+      await reportDirectory404Outcome(this.db, riskReceipt, "failed");
+      return result;
     }
   }
 

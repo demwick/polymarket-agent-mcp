@@ -28,6 +28,34 @@
         "default": "3",
         "description": "Minimum trade size in USDC to copy from watched traders"
       },
+      "DIRECTORY_404_RISK_MODE": {
+        "type": "string",
+        "enum": [
+          "off",
+          "shadow"
+        ],
+        "default": "off",
+        "description": "Optional risk preflight: shadow never blocks or changes exact binary live orders"
+      },
+      "DIRECTORY_404_EXECUTION_MODE": {
+        "type": "string",
+        "enum": [
+          "supervised",
+          "unattended"
+        ],
+        "default": "unattended",
+        "description": "Execution context reported to the optional risk preflight"
+      },
+      "DIRECTORY_404_GEOGRAPHIC_ELIGIBILITY": {
+        "type": "string",
+        "enum": [
+          "eligible",
+          "blocked",
+          "unknown"
+        ],
+        "default": "unknown",
+        "description": "Caller-observed Polymarket eligibility reported to the optional risk preflight"
+      },
       "POLY_API_KEY": {
         "type": "string",
         "description": "Polymarket CLOB API key (required for live mode)"
@@ -1443,6 +1471,14 @@
           "dataFlow": "inbound-only",
           "authentication": "none",
           "scope": "Public market price streams; no wallet or user identity transmitted"
+        },
+        {
+          "host": "404.directory",
+          "protocol": "https",
+          "purpose": "Optional fail-open prediction-market risk preflight and bounded execution outcome",
+          "sensitive": false,
+          "condition": "Only when COPY_MODE=live, DIRECTORY_404_RISK_MODE=shadow, and an exact YES/NO outcome is known",
+          "scope": "Public market slug, bounded action context, and random non-personal Agent ID; no wallet, credential, token ID, prompt, strategy, signed order, or raw order payload"
         }
       ],
       "inbound": [
@@ -1491,9 +1527,9 @@
       "note": "Any exec() calls in the source refer to better-sqlite3 Database.exec() for SQL statements, not child_process.exec()"
     },
     "dataHandling": {
-      "telemetry": "none",
+      "telemetry": "none by default; optional bounded 404.directory risk/outcome request only when explicitly enabled",
       "analytics": "none",
-      "thirdPartyReporting": "none",
+      "thirdPartyReporting": "optional 404.directory risk preflight as disclosed in permissions.network.outbound",
       "piiStored": "none",
       "secretsPersisted": "none",
       "localOnly": true
@@ -1503,7 +1539,7 @@
     "trustBoundary": "single-tenant local process; not designed for multi-user hosting",
     "secretsPolicy": "All secrets live exclusively in environment variables loaded at startup. None are written to disk, database, logs, stdout, or any outbound request except to their designated API endpoint over HTTPS.",
     "defaultMode": "preview (simulated trades) — requires explicit COPY_MODE=live and all four Polymarket CLOB credentials to place real orders",
-    "networkPolicy": "Only the four hosts listed in permissions.network.outbound are contacted. All HTTP requests use fetchWithRetry with a 10s timeout and bounded exponential backoff.",
+    "networkPolicy": "Only the five hosts listed in permissions.network.outbound are contacted. Polymarket HTTP requests use fetchWithRetry; optional 404.directory requests use a 3s timeout with no retry.",
     "inputValidation": "Every MCP tool input is validated through Zod schemas before reaching any service or database layer",
     "disclosureContact": "talhademirell@outlook.com",
     "disclosurePolicy": "SECURITY.md"

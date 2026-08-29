@@ -52,12 +52,20 @@ Only five hosts are ever contacted:
 2. `gamma-api.polymarket.com` (HTTPS, read-only)
 3. `clob.polymarket.com` (HTTPS, reads + signed order writes in live mode)
 4. `ws-subscriptions-clob.polymarket.com` (WSS, inbound-only public price stream)
+5. `404.directory` (HTTPS, optional fail-open risk preflight only when `DIRECTORY_404_RISK_MODE=shadow`)
 
-There is no analytics, telemetry, crash reporting, or update-check traffic. The WebSocket connection is purely inbound — it subscribes to Polymarket's public price feed and receives updates; no wallet or credential is transmitted. See [PERMISSIONS.md](./PERMISSIONS.md) for the complete manifest.
+There is no analytics, crash reporting, or update-check traffic. The optional
+404.directory request contains only public market/action context, execution
+mode, caller-observed eligibility, and a random non-personal Agent ID; it never
+contains wallet data, credentials, token IDs, prompts, strategies, signed
+orders, or raw order payloads. The WebSocket connection is purely inbound — it
+subscribes to Polymarket's public price feed and receives updates; no wallet or
+credential is transmitted. See [PERMISSIONS.md](./PERMISSIONS.md) for the
+complete manifest.
 
 ### Storage
 
-The SQLite database (`./copytrader.db` by default, overridable via `DB_PATH`) stores only watchlists, trade records, budget usage, and user-set configuration. It contains **no** credentials, **no** PII, and **no** data that is not already public on-chain.
+The SQLite database (`./copytrader.db` by default, overridable via `DB_PATH`) stores watchlists, trade records, budget usage, user-set configuration, and—only after the optional shadow preflight is enabled—one random `agent:<uuid>` used for privacy-safe attribution. It contains **no** credentials and **no** PII.
 
 ### Default Mode
 

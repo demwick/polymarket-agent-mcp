@@ -30,6 +30,9 @@ const configSchema = z.object({
   MCP_API_KEY: z.string().optional().default(""),
   DB_PATH: z.string().optional().default(""),
   PORT: z.coerce.number().int().positive().optional(),
+  DIRECTORY_404_RISK_MODE: z.enum(["off", "shadow"]).default("off"),
+  DIRECTORY_404_EXECUTION_MODE: z.enum(["supervised", "unattended"]).default("unattended"),
+  DIRECTORY_404_GEOGRAPHIC_ELIGIBILITY: z.enum(["eligible", "blocked", "unknown"]).default("unknown"),
 });
 
 export type Config = z.infer<typeof configSchema>;

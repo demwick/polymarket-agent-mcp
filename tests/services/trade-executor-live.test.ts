@@ -30,8 +30,16 @@ vi.mock("@ethersproject/wallet", () => ({
 }));
 
 let liveCredentials = true;
+let directory404RiskMode: "off" | "shadow" = "off";
 vi.mock("../../src/utils/config.js", () => ({
-  getConfig: () => ({ DAILY_BUDGET: 20, CHAIN_ID: 137, POLY_FUNDER_ADDRESS: "0xfunder" }),
+  getConfig: () => ({
+    DAILY_BUDGET: 20,
+    CHAIN_ID: 137,
+    POLY_FUNDER_ADDRESS: "0xfunder",
+    DIRECTORY_404_RISK_MODE: directory404RiskMode,
+    DIRECTORY_404_EXECUTION_MODE: "unattended",
+    DIRECTORY_404_GEOGRAPHIC_ELIGIBILITY: "unknown",
+  }),
   getSigningKey: () => "0x" + "a".repeat(64),
   hasLiveCredentials: () => liveCredentials,
 }));
@@ -60,6 +68,7 @@ describe("TradeExecutor (live mode)", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     liveCredentials = true;
+    directory404RiskMode = "off";
     createAndPostOrder.mockResolvedValue({ success: true, orderID: "ord_1" });
     getOpenOrders.mockResolvedValue([]);
     db = new Database(":memory:");
@@ -90,6 +99,30 @@ describe("TradeExecutor (live mode)", () => {
 
     const [trade] = getTradeHistory(db, { limit: 10 });
     expect(trade).toMatchObject({ mode: "live", status: "executed", side: "BUY", price: 0.42 });
+  });
+
+  it("runs an optional shadow preflight without changing order execution", async () => {
+    directory404RiskMode = "shadow";
+    const fetchMock = vi.spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(new Response(JSON.stringify({
+        receipt_id: "11111111-1111-4111-8111-111111111111",
+        outcome_token: "a".repeat(48),
+        decision: "review",
+        reason_codes: ["TIME_BOUNDARY_UNCLEAR"],
+      }), { status: 200, headers: { "content-type": "application/json" } }))
+      .mockResolvedValueOnce(new Response("{}", { status: 200 }));
+
+    const result = await executor.execute(makeOrder({ outcome: "YES" }));
+
+    expect(result).toMatchObject({ mode: "live", status: "executed" });
+    expect(createAndPostOrder).toHaveBeenCalledOnce();
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(JSON.parse(String(fetchMock.mock.calls[0][1]?.body))).toMatchObject({
+      market: "test-market",
+      intended_action: "buy_yes",
+      estimated_notional_usd: 5,
+    });
+    fetchMock.mockRestore();
   });
 
   it("passes GTD through as the order type", async () => {
