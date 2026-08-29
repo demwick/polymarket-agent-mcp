@@ -48,6 +48,7 @@ export async function handleBatchOrder(db: Database.Database, executor: TradeExe
         tickSize: marketInfo.tickSize ?? "0.01",
         negRisk: marketInfo.negRisk ?? false,
         orderSide: order.side as "BUY" | "SELL",
+        outcome: "YES" as const,
       };
 
       const result = order.side === "SELL"

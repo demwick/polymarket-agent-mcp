@@ -18,8 +18,9 @@ This document is the authoritative disclosure of everything `polymarket-agent-mc
 | `gamma-api.polymarket.com` | HTTPS | Read-only market metadata, prices, and resolution status | Read-only public data | Always available |
 | `clob.polymarket.com` | HTTPS | Order book reads; signed order placement | **Write-capable** | Order placement only when `COPY_MODE=live` **and** a user-initiated trade tool is invoked |
 | `ws-subscriptions-clob.polymarket.com` | WSS | Subscribe to real-time public price updates for explicitly watched markets | Inbound-only, unauthenticated | Only when the user calls `markets.watch_price` |
+| `404.directory` | HTTPS | Optional prediction-market risk preflight and bounded execution outcome | Public market/action context + random non-personal Agent ID | Only when `COPY_MODE=live`, `DIRECTORY_404_RISK_MODE=shadow`, and an exact YES/NO outcome is known; fail-open and never places or blocks an order |
 
-All outbound HTTP requests go through `fetchWithRetry` (`src/utils/fetch.ts`) with a 10-second timeout and at most two retries with exponential backoff. **No other outbound connections are made.** No analytics, crash reporting, update checks, or telemetry endpoints are contacted.
+Polymarket HTTP requests go through `fetchWithRetry` (`src/utils/fetch.ts`) with a 10-second timeout and at most two retries with exponential backoff. The optional 404.directory preflight uses a separate 3-second timeout with no retry so it cannot indefinitely delay live execution. **No other outbound connections are made.** No crash reporting or update-check endpoints are contacted.
 
 ### WebSocket Disclosure
 
@@ -52,6 +53,9 @@ This package is designed for **single-tenant** local or private deployments. See
 | `DAILY_BUDGET` | Public | No (default `20`) | Hard daily spending cap in USDC | Enforced by `BudgetManager` |
 | `MIN_CONVICTION` | Public | No (default `3`) | Minimum USDC trade size considered for copy-trading | Filter only |
 | `CHAIN_ID` | Public | No (default `137`) | Polygon chain id | Used in signed orders |
+| `DIRECTORY_404_RISK_MODE` | Public | No (default `off`) | Enables the optional fail-open risk preflight with `shadow`; `off` makes no 404.directory requests | Read before an exact binary live order |
+| `DIRECTORY_404_EXECUTION_MODE` | Public | No (default `unattended`) | Declares `supervised` or `unattended` execution context to the risk service | Sent only when the optional preflight is enabled |
+| `DIRECTORY_404_GEOGRAPHIC_ELIGIBILITY` | Public | No (default `unknown`) | Caller-observed `eligible`, `blocked`, or `unknown` Polymarket geoblock result | Sent only when the optional preflight is enabled |
 
 All environment variables are validated at startup through a Zod schema (`src/utils/config.ts`). If validation fails, the process exits before any service starts.
 
@@ -87,7 +91,7 @@ All runtime state lives in a single local SQLite file:
 | `watchlist` | Tracked wallet addresses (public) and alias strings | No |
 | `trades` | Trade history — simulated in preview, real in live | No |
 | `daily_budget` | Daily spending records | No |
-| `config` | User-set configuration key/value pairs (non-secret) | No |
+| `config` | User-set configuration key/value pairs plus one random `agent:<uuid>` for optional 404.directory attribution | No |
 | `agent_cycles` | Agent automation logs | No |
 | `market_watchlist` | Price alert watchlist | No |
 
@@ -97,7 +101,7 @@ No data is sent to external analytics, telemetry, error reporting, or any third-
 
 - Does not spawn child processes or execute shell commands
 - Does not access the filesystem beyond the SQLite database and `.env`
-- Does not send telemetry, analytics, crash reports, or update checks
+- Does not send analytics, crash reports, or update checks; the optional 404.directory shadow mode sends only the disclosed bounded risk and outcome fields
 - Does not modify system configuration
 - Does not install additional packages at runtime
 - Does not use `eval()`, `Function()`, or dynamic code execution

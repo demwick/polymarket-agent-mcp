@@ -48,6 +48,9 @@ export async function handlePlaceStinkBid(
       tickSize: market.tickSize,
       negRisk: market.negRisk,
       orderType: "GTC",
+      outcome: /^(yes|no)$/i.test(market.favoriteOutcome)
+        ? (market.favoriteOutcome.toUpperCase() as "YES" | "NO")
+        : undefined,
     });
 
     if (result.status !== "failed") {

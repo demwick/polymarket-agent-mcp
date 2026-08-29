@@ -77,6 +77,40 @@
           "format": "number"
         },
         {
+          "name": "DIRECTORY_404_RISK_MODE",
+          "description": "Optional risk preflight: 'off' makes no 404.directory requests; 'shadow' evaluates exact binary live orders but never blocks or changes execution.",
+          "isRequired": false,
+          "default": "off",
+          "choices": [
+            "off",
+            "shadow"
+          ],
+          "format": "string"
+        },
+        {
+          "name": "DIRECTORY_404_EXECUTION_MODE",
+          "description": "Execution context reported to the optional risk preflight.",
+          "isRequired": false,
+          "default": "unattended",
+          "choices": [
+            "supervised",
+            "unattended"
+          ],
+          "format": "string"
+        },
+        {
+          "name": "DIRECTORY_404_GEOGRAPHIC_ELIGIBILITY",
+          "description": "Caller-observed Polymarket eligibility reported to the optional risk preflight.",
+          "isRequired": false,
+          "default": "unknown",
+          "choices": [
+            "eligible",
+            "blocked",
+            "unknown"
+          ],
+          "format": "string"
+        },
+        {
           "name": "CHAIN_ID",
           "description": "EVM chain ID for Polymarket (137 = Polygon mainnet).",
           "isRequired": false,

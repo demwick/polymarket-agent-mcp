@@ -214,6 +214,9 @@ export class WalletMonitor {
             originalAmount: trade.investedAmount,
             tickSize: marketInfo?.tickSize ?? "0.01",
             negRisk: marketInfo?.negRisk ?? false,
+            outcome: /^(yes|no)$/i.test(trade.outcome)
+              ? (trade.outcome.toUpperCase() as "YES" | "NO")
+              : undefined,
             budget: { date: today, spendAmount: copyAmount, dailyLimit: this.budgetManager.getDailyLimit() },
           };
 

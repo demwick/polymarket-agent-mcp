@@ -280,6 +280,28 @@ All secrets stay in memory for the lifetime of the process — they are **never*
 | `MIN_CONVICTION` | No | `3` | Min trade size to copy ($) |
 | Wallet signing key | Live only | - | Locally signs CLOB order payloads, never persisted (see PERMISSIONS.md for exact env var name) |
 | CLOB API credentials | Live only | - | API key / secret / passphrase — sent only to `clob.polymarket.com` (see PERMISSIONS.md for exact names) |
+| `DIRECTORY_404_RISK_MODE` | No | `off` | `off` disables the integration; `shadow` evaluates exact binary live orders but never blocks or changes execution |
+| `DIRECTORY_404_EXECUTION_MODE` | No | `unattended` | Declares whether the contemplated order is `supervised` or `unattended` |
+| `DIRECTORY_404_GEOGRAPHIC_ELIGIBILITY` | No | `unknown` | Caller-observed Polymarket eligibility: `eligible`, `blocked`, or `unknown` |
+
+### Optional 404.directory shadow preflight
+
+Operators can opt into an evidence-backed settlement, liquidity, and execution
+risk check immediately before exact YES/NO live orders:
+
+```env
+DIRECTORY_404_RISK_MODE=shadow
+DIRECTORY_404_EXECUTION_MODE=unattended
+DIRECTORY_404_GEOGRAPHIC_ELIGIBILITY=unknown
+```
+
+Shadow mode is fail-open: `allow`, `review`, `block`, timeout, and service
+failure all leave the existing order path unchanged. The request contains only
+the public market slug, YES/NO action, approximate notional, execution mode,
+caller-configured eligibility, and one random Agent ID stored in the existing
+SQLite `config` table. A bounded executed/failed outcome is reported after the
+order. Wallet data, credentials, token IDs, prompts, strategies, signed orders,
+and raw order payloads are never sent to 404.directory.
 
 ---
 
@@ -301,11 +323,11 @@ This package has a transparent, minimal footprint. Full disclosure: **[PERMISSIO
 
 | Category | Scope |
 |----------|-------|
-| **Network (outbound)** | 3 Polymarket HTTPS APIs + 1 inbound-only WSS public price stream (`ws-subscriptions-clob.polymarket.com`) |
+| **Network (outbound)** | 3 Polymarket HTTPS APIs + 1 inbound-only WSS public price stream; optional `404.directory` HTTPS risk preflight only when explicitly enabled |
 | **Filesystem** | Single SQLite database file + `.env` read at startup — nothing else |
 | **Environment** | API credentials (live mode only, in memory only), budget config, mode selection |
 | **Processes** | None — no child processes, no shell commands, no `eval`/`Function` |
-| **Telemetry** | None — no analytics, no crash reports, no update checks, no third-party data flow |
+| **Telemetry** | None by default. Optional shadow preflight sends the bounded fields disclosed above; no analytics, crash reports, or update checks |
 
 **WebSocket scope:** The WSS connection to Polymarket is **inbound-only** for public price updates. No wallet, credential, or user identity is transmitted — it carries the same public feed available to any browser client.
 

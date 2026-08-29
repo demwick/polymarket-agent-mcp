@@ -44,6 +44,7 @@ export async function handleBuy(db: Database.Database, executor: TradeExecutor, 
     tickSize: marketInfo.tickSize ?? "0.01",
     negRisk: marketInfo.negRisk ?? false,
     orderSide: "BUY",
+    outcome: input.outcome,
   };
 
   const result = await executor.execute(order);
